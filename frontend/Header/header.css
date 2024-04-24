@@ -1,0 +1,23 @@
+/* header.css */
+.header {
+    padding: 24px 52px 29px 52px;
+    background: #A5A6BD;
+    border-radius: 39px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+    .header a {
+        color: #242331;
+        font-size: 18px;
+        font-family: Inter, sans-serif;
+        font-weight: 400;
+        text-decoration: none;
+        padding: 0 10px;
+    }
+
+        .header a:hover, .header a.active {
+            font-weight: 700;
+        }
