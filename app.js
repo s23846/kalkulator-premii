@@ -3,6 +3,12 @@ const path = require('path');
 const app = express();
 const port = 3000;
 
+app.use('/frontend', express.static('frontend'));
+
+
+app.use('/frontend/Header', express.static('Header'));
+
+
 // Middleware do ustawiania Content-Type z UTF-8
 app.use((req, res, next) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -17,7 +23,7 @@ app.get('frontend/Header/header.html', (req, res) => {
 });
 
 app.get('/frontend/Header/header.css', (req, res) => {
-    res.setHeader('Content-Type', 'text/css; charset=utf-8');
+    newFunction(res);
     res.sendFile(path.join(__dirname, 'frontend', 'Header', 'header.css'));
 });
 
@@ -53,3 +59,7 @@ app.post('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Application is listening at http://localhost:${port}`);
 });
+
+function newFunction(res) {
+    res.setHeader('Content-Type', 'text/css');
+}
