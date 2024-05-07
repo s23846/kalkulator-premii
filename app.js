@@ -14,9 +14,9 @@ const db = mysql.createConnection({
 
 db.connect((err) => {
     if (err) {
-        console.error('B³¹d po³¹czenia z baz¹ danych:', err);
+        console.error('Bï¿½ï¿½d poï¿½ï¿½czenia z bazï¿½ danych:', err);
     } else {
-        console.log('Po³¹czono z baz¹ danych MySQL.');
+        console.log('Poï¿½ï¿½czono z bazï¿½ danych MySQL.');
     }
 });
 
@@ -86,7 +86,7 @@ app.get('/api/employees', (req, res) => {
         if (results.length === 0) {
             return res.json([{
                 ID_pracownika: null,
-                Imiê: null,
+                ImiÄ™: null,
                 Nazwisko: null,
                 Stanowisko: null,
                 Rodzaj_zatrudnienia: null,
