@@ -76,7 +76,7 @@ app.post('/', (req, res) => {
 
 // Trasa API zwracająca dane z tabeli pracowników lub `null` w razie błędu
 app.get('/api/employees', (req, res) => {
-    if (db.state === 'disconnected' || db.state=== ) {
+    if (db.state === 'disconnected' || db.state==='ECONNREFUSED') {
         console.error('Brak połączenia z bazą danych.');
         return res.json([{
             ID_pracownika: null,
