@@ -14,9 +14,9 @@ const db = mysql.createConnection({
 
 db.connect((err) => {
     if (err) {
-        console.error('B��d po��czenia z baz� danych:', err);
+        console.error('Błąd połączenia z bazą danych:', err);
     } else {
-        console.log('Po��czono z baz� danych MySQL.');
+        console.log('Połączono z bazą danych MySQL.');
     }
 });
 
