@@ -67,4 +67,30 @@ async function fetchAndPopulate(url, rowCount, columnNames, tableBodyId) {
         const nullRows = generateNullRows(rowCount, columnNames);
         populateTable(nullRows, tableBodyId);
     }
+}// Usuwa zaznaczony wiersz na podstawie zaznaczonego radio buttona
+function deleteSelectedRow() {
+    // Znajduje zaznaczony radio button w tabeli
+    const selectedRadio = document.querySelector('tbody input[name="pracownik"]:checked');
+    if (selectedRadio) {
+        // Pobiera wiersz rodzica wybranego radio buttona i go usuwa
+        const row = selectedRadio.closest('tbody');
+        if (row) {
+            row.parentElement.removeChild(row);
+            console.log('Usuniêto zaznaczony wiersz.');
+        } else {
+            console.warn('Nie znaleziono wiersza do usuniêcia.');
+        }
+    } else {
+        console.warn('Nie zaznaczono ¿adnego wiersza.');
+    }
 }
+
+// Dodaje obs³ugê klikniêcia na przycisk "Usuñ"
+document.addEventListener('DOMContentLoaded', function () {
+    const deleteButton = document.getElementById('button3');
+    if (deleteButton) {
+        deleteButton.addEventListener('click', deleteSelectedRow);
+    } else {
+        console.error('Nie znaleziono przycisku "Usuñ".');
+    }
+});

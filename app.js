@@ -43,6 +43,11 @@ app.get('/frontend/Header/header.css', (req, res) => {
     res.sendFile(path.join(__dirname, 'frontend', 'Header', 'header.css'));
 });
 
+app.get('/frontend/Table/table.js', (req, res) => {
+    newFunction(res);
+    res.sendFile(path.join(__dirname, 'frontend', 'Table', 'table.js'));
+});
+
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -118,6 +123,8 @@ app.get('/api/employees', (req, res) => {
         res.json(results);
     });
 });
+
+
 
 // Start the server
 app.listen(port, () => {

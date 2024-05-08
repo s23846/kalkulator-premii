@@ -3,7 +3,8 @@
     "",
     "\\backend",
     "\\frontend",
-    "\\frontend\\Header"
+    "\\frontend\\Header",
+    "\\frontend\\Table"
   ],
   "PreviewInSolutionExplorer": false
 }
