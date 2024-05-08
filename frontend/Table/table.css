@@ -36,6 +36,25 @@ tbody td {
     color: black;
 }
 
+#button1, #button2, #button3 {
+    background-color: #A5A6BD; /* Zielony kolor tła */
+    color: black; /* Biały kolor tekstu */
+    padding: 10px 20px; /* Wielkość wypełnienia */
+    border: none; /* Usunięcie obramowania */
+    border-radius: 5px; /* Zaokrąglenie rogów */
+    cursor: pointer; /* Zmiana kursora na wskaźnik */
+    text-align: center; /* Wyrównanie tekstu do środka */
+    text-decoration: none; /* Usunięcie domyślnego podkreślenia */
+    font-size: 12px;
+    margin-right: 10px;
+}
+
+#button1:hover, #button2:hover, #button3:hover {
+    background-color: rgba(199, 210, 240, 0.50); /* Ciemniejszy zielony kolor tła po najechaniu myszką */
+    font-weight: bold;
+}
+
+
     tbody td.null {
         color: gray;
         text-align: center;
