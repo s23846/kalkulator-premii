@@ -18,6 +18,7 @@
     <table border="1">
         <thead>
             <tr>
+                <th>Wybierz</th>
                 <th>Lp.</th>
                 <th>ID Pracownika</th>
                 <th>Imię</th>
@@ -28,17 +29,39 @@
             </tr>
         </thead>
         <tbody id="tableBody">
+            <td><input type="radio"></td>
+            <td>1</td>
+            <td>1</td>
+            <td>Jan</td>
+            <td>Kowlaski</td>
+            <td>UX</td>
+            <td>UOP</td>
+            <td>50</td>
+        </tbody>
+        <tbody>
+            <td><input type="radio"></td>
+            <td>2</td>
+            <td>2</td>
+            <td>Teresa</td>
+            <td>Kalkuta</td>
+            <td>UI</td>
+            <td>B2B</td>
+            <td>55</td>
+        </tbody>
+        <tbody>
+            <td><input type="radio"></td>
+            <td>3</td>
+            <td>3</td>
+            <td>Lala</td>
+            <td>Mierda</td>
+            <td>TESTER</td>
+            <td>UZ</td>
+            <td>30</td>
         </tbody>
     </table>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const apiUrl = 'http://localhost:3000/api/employees';
-            const columnNames = ['ID_pracownika', 'Imię', 'Nazwisko', 'Stanowisko', 'Rodzaj_zatrudnienia', 'Stawka_godz_brutto'];
-
-            fetchAndPopulate(apiUrl, 1, columnNames, 'tableBody');
-        });
-    </script>
-
+    <button id="buuton1">Zapisz</button1>
+    <button id="button2">Edytuj</button2>
+    <button id="button3">Usuń</button3>
 </body>
 </html>

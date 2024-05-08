@@ -74,17 +74,25 @@ app.post('/', (req, res) => {
     res.send('Dane otrzymane przez POST');
 });
 
-// API endpoint to get employee data
+// Trasa API zwracająca dane z tabeli pracowników lub `null` w razie błędu
 app.get('/api/employees', (req, res) => {
-    const query = `SELECT * FROM Pacownik LIMIT 1`; // Adjust the table name
-    connection.query(query, (error, results) => {
+    if (db.state === 'disconnected' || db.state=== ) {
+        console.error('Brak połączenia z bazą danych.');
+        return res.json([{
+            ID_pracownika: null,
+            Imię: null,
+            Nazwisko: null,
+            Stanowisko: null,
+            Rodzaj_zatrudnienia: null,
+            Stawka_godz_brutto: null
+        }]);
+    }
+
+    const query = `SELECT * FROM Pacownik LIMIT 1`;
+    db.query(query, (error, results) => {
         if (error) {
-            console.error('Query error:', error);
-            return res.status(500).json({ error: 'Database query error' });
-        }
-        // If no data, return a null record
-        if (results.length === 0) {
-            return res.json([{
+            console.error('Błąd zapytania:', error);
+            return res.status(500).json([{
                 ID_pracownika: null,
                 Imię: null,
                 Nazwisko: null,
@@ -93,7 +101,20 @@ app.get('/api/employees', (req, res) => {
                 Stawka_godz_brutto: null
             }]);
         }
-        // Return data as JSON
+
+                // Jeśli nie ma danych, zwróć obiekt `null`
+                if (results.length === 0) {
+                    return res.json([{
+                        ID_pracownika: null,
+                        Imię: null,
+                        Nazwisko: null,
+                        Stanowisko: null,
+                        Rodzaj_zatrudnienia: null,
+                        Stawka_godz_brutto: null
+                    }]);
+                }
+
+        // Zwróć rzeczywiste dane jako JSON
         res.json(results);
     });
 });
