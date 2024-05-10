@@ -9,9 +9,9 @@
  
 
     <link rel=" stylesheet" href="/frontend/Table/table.css" />
-    <script src="frontend/Table/table.js"></script>
 </head>
 <body>
+    <div id="header-container"></div>
 
     <!-- Nagłówek interaktywny -->
     <!-- Table structure -->
@@ -29,39 +29,58 @@
             </tr>
         </thead>
         <tbody id="tableBody">
-            <td><input type="radio" name="pracownik"></td>
-            <td>1</td>
-            <td>1</td>
-            <td>Jan</td>
-            <td>Kowlaski</td>
-            <td>UX</td>
-            <td>UOP</td>
-            <td>50</td>
-        </tbody>
-        <tbody>
-            <td><input type="radio" name="pracownik"></td>
-            <td>2</td>
-            <td>2</td>
-            <td>Teresa</td>
-            <td>Kalkuta</td>
-            <td>UI</td>
-            <td>B2B</td>
-            <td>55</td>
-        </tbody>
-        <tbody>
-            <td><input type="radio" name="pracownik"></td>
-            <td>3</td>
-            <td>3</td>
-            <td>Lala</td>
-            <td>Mierda</td>
-            <td>TESTER</td>
-            <td>UZ</td>
-            <td>30</td>
+            <tr>
+                <td><input type="radio" name="pracownik"></td>
+                <td>1</td>
+                <td>1</td>
+                <td>Jan</td>
+                <td>Kowlaski</td>
+                <td>UX</td>
+                <td>UOP</td>
+                <td>50</td>
+            </tr>
+            <tr>
+                <td><input type="radio" name="pracownik"></td>
+                <td>2</td>
+                <td>2</td>
+                <td>Teresa</td>
+                <td>Kalkuta</td>
+                <td>UI</td>
+                <td>B2B</td>
+                <td>55</td>
+            </tr>
+            <tr>
+                <td><input type="radio" name="pracownik"></td>
+                <td>3</td>
+                <td>3</td>
+                <td>Lala</td>
+                <td>Mierda</td>
+                <td>TESTER</td>
+                <td>UZ</td>
+                <td>30</td>
+            </tr>
         </tbody>
     </table>
 
-    <button id="button1">Dodaj</button>
+    <form id="myForm">
+        <table>
+            <tr>
+                <td><input type="text" id="input1"></td>
+                <td><input type="text" id="input2"></td>
+                <td><input type="text" id="input3"></td>
+                <td><input type="text" id="input4"></td>
+                <td><input type="text" id="input5"></td>
+                <td><input type="text" id="input6"></td>
+                <td><input type="text" id="input7"></td>
+            </tr>
+        </table>
+        <button id="button1">Dodaj</button>
+    </form>
+
+    
     <button id="button2">Edytuj</button>
-        <button id="button3">Usuń</button>
+    <button id="button3">Usuń</button>
+    <button id="button4">Zapisz</button>
+        <script src="frontend/Table/table.js"></script>
 </body>
 </html>

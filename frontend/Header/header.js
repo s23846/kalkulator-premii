@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(html => {
             document.getElementById('header-container').innerHTML = html;
             highlightActiveLink();
+            loadCss();
         });
 });
 
@@ -24,11 +25,29 @@ function highlightActiveLink() {
     });
 }
 
-function loadPage(pageUrl) {
-    fetch(pageUrl)
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById('content').innerHTML = html;
-            highlightActiveLink(); // Refresh active link highlights when new page is loaded
-        }).catch(err => console.error('Failed to load page: ', err));
+// function loadPage(pageUrl) {
+//     fetch(pageUrl)
+//         .then(response => response.text())
+//         .then(html => {
+//             document.getElementById('content').innerHTML = html;
+//             highlightActiveLink(); // Refresh active link highlights when new page is loaded
+//         }).catch(err => console.error('Failed to load page: ', err));
+// }
+
+function loadCss() {
+    // Get HTML head element
+    let head = document.getElementsByTagName('HEAD')[0];
+ 
+    // Create new link Element
+    let link = document.createElement('link');
+
+    // set the attributes for link element
+    link.rel = 'stylesheet';
+
+    link.type = 'text/css';
+
+    link.href = '/frontend/Header/header.css';
+
+    // Append link element to HTML head
+    head.appendChild(link);
 }
