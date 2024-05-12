@@ -23,6 +23,23 @@ document.getElementById("button1").addEventListener("click", function(event) {
     var input5Value = document.getElementById("input5").value;
     var input6Value = document.getElementById("input6").value;
     var input7Value = document.getElementById("input7").value;
+
+    var inputs = document.querySelectorAll('input[type="text"]'); // Pobierz wszystkie pola wejściowe typu tekstowego
+        
+    // Iteruj przez wszystkie pola wejściowe i sprawdź, czy jakiekolwiek z nich są puste
+    var isEmpty = false;
+    for (var i = 0; i < inputs.length; i++) {
+        if (inputs[i].value.trim() === "") {
+            isEmpty = true;
+            break; // Jeśli jakiekolwiek pole jest puste, przerwij pętlę
+        }
+    }
+    
+    // Jeśli jakiekolwiek pole wejściowe jest puste, wyświetl komunikat
+    if (isEmpty) {
+        alert("Proszę wypełnić wszystkie pola formularza.");
+        return; // Przerwij działanie funkcji, jeśli jakieś pole jest puste
+    }
     
     // Do something with the values, for example, log them to the console
     console.log("Input 1:", input1Value);
@@ -33,7 +50,7 @@ document.getElementById("button1").addEventListener("click", function(event) {
     console.log("Input 6:", input6Value);
     console.log("Input 7:", input7Value);
     row.innerHTML += ` <tr>
-    <td></td>
+    <td><input type="radio" name="pracownik"></td>
     <td>${input1Value}</td>
     <td>${input2Value}</td>
     <td>${input3Value}</td>
@@ -42,6 +59,8 @@ document.getElementById("button1").addEventListener("click", function(event) {
     <td>${input6Value}</td>
     <td>${input7Value}</td>
 </tr>`
+    // Wyczyść pola tekstowe formularza po dodaniu wiersza
+    document.getElementById("myForm").reset();
 });
 
 document.getElementById("button2").addEventListener("click", function(event) {
@@ -115,4 +134,28 @@ document.getElementById("button2").addEventListener("click", function(event) {
             alert("Proszę wybrać pracownika do edycji.");
         }
     });
+
+    document.getElementById("button3").addEventListener("click", function(event) {
+        event.preventDefault(); // Prevent the default form submission
+        
+        // Pobierz wszystkie radio buttons
+        var radioButtons = document.querySelectorAll('input[type="radio"][name="pracownik"]');
+        
+        var selectedRow = null;
+        
+        // Sprawdź, który wiersz jest zaznaczony
+        for (var i = 0; i < radioButtons.length; i++) {
+            if (radioButtons[i].checked) {
+                selectedRow = radioButtons[i].parentNode.parentNode; // Pobierz rodzica rodzica, czyli <tr>
+                break;
+            }
+        }
+        
+        if (selectedRow) {
+            selectedRow.remove(); // Usuń zaznaczony wiersz
+        } else {
+            alert("Proszę wybrać pracownika do usunięcia.");
+        }
+    });
+    
 

@@ -46,7 +46,7 @@ tbody td {
     text-align: center; /* Wyrównanie tekstu do środka */
     text-decoration: none; /* Usunięcie domyślnego podkreślenia */
     font-size: 12px;
-    margin-right: 10px;
+    margin-right: 15px;
 }
 
 #button1:hover, #button2:hover, #button3:hover, #button4:hover {
@@ -65,4 +65,10 @@ tbody td {
     th, td {
         font-size: 12px;
     }
+}
+
+input[type="text"] {
+    width: 100%; /* Ustawienie szerokości na 100% szerokości rodzica (czyli komórki tabeli) */
+    box-sizing: border-box; /* Ustawienie box-sizing na border-box, aby szerokość uwzględniała padding i border */
+    text-transform: uppercase; /* Zamieniaj wprowadzany tekst na duże litery */
 }

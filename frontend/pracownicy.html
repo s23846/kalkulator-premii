@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strona Główna</title>
+    <title>Lista pracowników</title>
 
     <script src="/frontend/Header/header.js"></script>
  
@@ -65,19 +65,39 @@
     <form id="myForm">
         <table>
             <tr>
-                <td><input type="text" id="input1"></td>
-                <td><input type="text" id="input2"></td>
-                <td><input type="text" id="input3"></td>
-                <td><input type="text" id="input4"></td>
-                <td><input type="text" id="input5"></td>
-                <td><input type="text" id="input6"></td>
-                <td><input type="text" id="input7"></td>
+                <td>
+                    <label for="input1">Podaj <b>Lp.:</b></label><br>
+                    <input type="text" id="input1">
+                </td>
+                <td>
+                    <label for="input2">Podaj <b>Pracownika:</b></label><br>
+                    <input type="text" id="input2">
+                </td>
+                <td>
+                    <label for="input3">Podaj <b>Imię:</b></label>
+                    <input type="text" id="input3">
+                </td>
+                <td>
+                    <label for="input4">Podaj <b>Nazwisko:</b></label>
+                    <input type="text" id="input4">
+                </td>
+                <td>
+                    <label for="input5">Podaj <b>Stanowisko:</b></label>
+                    <input type="text" id="input5">
+                </td>
+                <td>
+                    <label for="input6">Podaj <b>Rodzaj zatrudnienia:</b></label>
+                    <input type="text" id="input6">
+                </td>
+                <td>
+                    <label for="input7">Podaj <b>Stawka godzinowa brutto:</b></label>
+                    <input type="text" id="input7">
+                </td>
             </tr>
         </table>
-        <button id="button1">Dodaj</button>
     </form>
 
-    
+    <button id="button1">Dodaj</button>
     <button id="button2">Edytuj</button>
     <button id="button3">Usuń</button>
     <button id="button4">Zapisz</button>
