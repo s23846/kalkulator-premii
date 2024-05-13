@@ -5,14 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Strona Główna</title>
     <script src="/frontend/Header/header.js"></script>
+    <link rel=" stylesheet" href="/frontend/Table/table.css" />
 </head>
 <body>
-
     <!--Nagłówek interaktywny-->
     <div id="header-container"></div>
-    <div>
-        <h1>Hello word 4</h1>
-    </div>
 
+        <!-- Pola tekstowe do filtrowania danych -->
+        <div id="filter-container">
+            <label for="filterImie">Imię:</label>
+            <input type="text" id="filterImie">
+            <label for="filterNazwisko">Nazwisko:</label>
+            <input type="text" id="filterNazwisko">
+            <button id="applyFilters">Filtruj</button>
+        </div>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Wybierz</th>
+                <th>ID Pracownika</th>
+                <th>Imię</th>
+                <th>Nazwisko</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+    </table>
+        <button id="button7">Wybierz Pracownika</button>
+        <script src="frontend/Table2/table2.js"></script>
 </body>
 </html>

@@ -36,7 +36,7 @@ tbody td {
     color: black;
 }
 
-#button1, #button2, #button3, #button4, #button5, #button6 {
+#button1, #button2, #button3, #button4, #button5, #button6, #button7, #applyFilters {
     background-color: #A5A6BD; /* Zielony kolor tła */
     color: black; /* Biały kolor tekstu */
     padding: 10px 20px; /* Wielkość wypełnienia */
@@ -49,7 +49,7 @@ tbody td {
     margin-right: 15px;
 }
 
-#button1:hover, #button2:hover, #button3:hover, #button4:hover ,#button5:hover, #button6:hover{
+#button1:hover, #button2:hover, #button3:hover, #button4:hover ,#button5:hover, #button6:hover, #button7:hover, #applyFilters:hover{
     background-color: rgba(199, 210, 240, 0.50); /* Ciemniejszy zielony kolor tła po najechaniu myszką */
     font-weight: bold;
 }
@@ -71,4 +71,15 @@ input[type="text"] {
     width: 100%; /* Ustawienie szerokości na 100% szerokości rodzica (czyli komórki tabeli) */
     box-sizing: border-box; /* Ustawienie box-sizing na border-box, aby szerokość uwzględniała padding i border */
     text-transform: uppercase; /* Zamieniaj wprowadzany tekst na duże litery */
+}
+
+#filterImie, #filterNazwisko {
+    /* Stylizacja dla pól tekstowych */
+    width: 200px; /* Ustawienie szerokości */
+    padding: 8px; /* Dodanie wypełnienia */
+    margin-right: 10px; /* Dodanie marginesu na prawo */
+    margin-top: 20px; /* Dodanie marginesu na górę */
+    border: 1px solid #ccc; /* Dodanie obramowania */
+    border-radius: 5px; /* Zaokrąglenie rogów */
+    font-size: 14px; /* Ustawienie rozmiaru czcionki */
 }
