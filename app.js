@@ -1,7 +1,11 @@
 const express = require('express');
 const path = require('path');
 const app = express();
-const port = 3000;
+const port = 3005;
+const fs= require('fs');
+const bodyParser = require('body-parser');
+app.use(bodyParser.text());
+
 
 
 // Serve static files
@@ -50,4 +54,28 @@ app.post('/', (req, res) => {
 // Start the server
 app.listen(port, () => {
     console.log(`Application is listening at http://localhost:${port}`);
+});
+
+app.post('/save-to-repository', (req, res) => {
+    const csvContent = req.body;
+
+    fs.writeFile('frontend/Listapracowników.csv', csvContent, 'utf8', (err) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Wystąpił błąd podczas zapisywania danych.');
+        } else {
+            res.send('Dane zostały zapisane pomyślnie.');
+        }
+    });
+});
+
+app.get('/get-csv-data', (req, res) => {
+    fs.readFile('frontend/Listapracowników.csv', 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Wystąpił błąd podczas odczytu danych.');
+            return;
+        }
+        res.send(data);
+    });
 });

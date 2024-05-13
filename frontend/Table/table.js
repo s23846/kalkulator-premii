@@ -157,5 +157,123 @@ document.getElementById("button2").addEventListener("click", function(event) {
             alert("Proszę wybrać pracownika do usunięcia.");
         }
     });
+
+    document.getElementById("button5").addEventListener("click", function(event) {
+        event.preventDefault(); // Zapobiega domyślnej akcji przycisku
+        
+        // Pobierz tabelę
+        var table = document.getElementById("tableBody");
     
+        // Przygotuj dane CSV
+        var csv = [];
+        var rows = table.querySelectorAll("tr");
+        rows.forEach(function(row) {
+            var rowData = [];
+            var cells = row.querySelectorAll("td");
+            cells.forEach(function(cell) {
+                rowData.push(cell.innerText);
+            });
+            csv.push(rowData.join(","));
+        });
+        var csvContent = "data:text/csv;charset=utf-8," + csv.join("\n");
+    
+        // Utwórz link do pobrania danych CSV
+        var link = document.createElement("a");
+        link.setAttribute("href", csvContent);
+        link.setAttribute("download", "dane.csv");
+        document.body.appendChild(link); // Dodaj link do dokumentu
+        link.click(); // Kliknij link (uruchom pobieranie)
+    });
+
+    document.getElementById("button6").addEventListener("click", function() {
+        saveDataToFileRepository();
+    });
+    
+    function saveDataToFileRepository() {
+        const rows = document.querySelectorAll("#tableBody tr");
+        let csvContent = "";
+        rows.forEach(row => {
+            const rowData = Array.from(row.children).map(td => td.textContent).join(",");
+            csvContent += rowData.replace(/^,/,'') + "\n";
+        });
+    
+        console.log("Dane do wysłania:", csvContent);
+    
+        fetch('/save-to-repository', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain' // Zmiana typu treści na text/plain
+            },
+            body: csvContent
+        })
+        .then(response => {
+            console.log("Odpowiedź serwera:", response);
+            if (!response.ok) {
+                throw new Error('Wystąpił problem podczas zapisywania danych.');
+            }
+            alert('Dane zostały zapisane pomyślnie.');
+        })
+        .catch(error => {
+            console.error('Błąd:', error);
+            alert('Wystąpił błąd podczas zapisywania danych.');
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        loadDataFromCSV();
+    });
+    
+    function loadDataFromCSV() {
+        fetch('/get-csv-data')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Wystąpił problem podczas pobierania danych.');
+            }
+            return response.text();
+        })
+        .then(csvData => {
+            fillTableWithData(csvData);
+        })
+        .catch(error => {
+            console.error('Błąd:', error);
+            alert('Wystąpił błąd podczas pobierania danych.');
+        });
+    }
+    
+    function fillTableWithData(csvData) {
+        const tableBody = document.getElementById("tableBody");
+        tableBody.innerHTML = ''; // Wyczyść zawartość tabeli przed wypełnieniem nowymi danymi
+    
+        const rows = csvData.split('\n');
+        rows.forEach(row => {
+            // Pomijaj puste wiersze
+            if (row.trim() === '') {
+                return;
+            }
+    
+            const rowData = row.split(',');
+            const tableRow = document.createElement('tr');
+    
+            // Dodaj przycisk radio do pierwszej komórki
+            const radioCell = document.createElement('td');
+            const radioInput = document.createElement('input');
+            radioInput.type = 'radio';
+            radioInput.name = 'pracownik';
+            radioCell.appendChild(radioInput);
+            tableRow.appendChild(radioCell);
+    
+            rowData.forEach(cellData => {
+                const tableCell = document.createElement('td');
+                // Zamień dane na wielkie litery
+                tableCell.textContent = cellData.toUpperCase();
+                tableRow.appendChild(tableCell);
+            });
+            tableBody.appendChild(tableRow);
+        });
+    }
+    
+    
+    
+    
+
 

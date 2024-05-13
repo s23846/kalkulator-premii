@@ -36,7 +36,7 @@ tbody td {
     color: black;
 }
 
-#button1, #button2, #button3, #button4 {
+#button1, #button2, #button3, #button4, #button5, #button6 {
     background-color: #A5A6BD; /* Zielony kolor tła */
     color: black; /* Biały kolor tekstu */
     padding: 10px 20px; /* Wielkość wypełnienia */
@@ -49,7 +49,7 @@ tbody td {
     margin-right: 15px;
 }
 
-#button1:hover, #button2:hover, #button3:hover, #button4:hover {
+#button1:hover, #button2:hover, #button3:hover, #button4:hover ,#button5:hover, #button6:hover{
     background-color: rgba(199, 210, 240, 0.50); /* Ciemniejszy zielony kolor tła po najechaniu myszką */
     font-weight: bold;
 }
