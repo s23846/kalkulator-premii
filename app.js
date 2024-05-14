@@ -79,3 +79,27 @@ app.get('/get-csv-data', (req, res) => {
         res.send(data);
     });
 });
+
+app.post('/save-employee-data', (req, res) => {
+    const csvContent = req.body;
+
+    fs.writeFile('frontend/rozliczeniePracownika.csv', csvContent, 'utf8', (err) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Wystąpił błąd podczas zapisywania danych.');
+        } else {
+            res.send('Dane zostały zapisane pomyślnie.');
+        }
+    });
+});
+
+app.get('/get-saved-data', (req, res) => {
+    fs.readFile('frontend/rozliczeniePracownika.csv', 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Wystąpił błąd podczas odczytu danych.');
+            return;
+        }
+        res.send(data);
+    });
+});

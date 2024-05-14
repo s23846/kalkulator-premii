@@ -1,9 +1,22 @@
 document.addEventListener("DOMContentLoaded", function() {
     loadDataFromCSV();
+    loadSavedData();
+    hideFutureYears();
+    document.getElementById("button7").addEventListener("click", handleEmployeeSelection);
+    document.getElementById("button8").addEventListener("click", saveTableToServer);
+    document.getElementById("mySelect").addEventListener("change", function() {
+        if (document.querySelector('table').style.display === "none") {
+            buildTableForYear(selectedEmployeeId);
+        }
+    });
 });
 
+let employeesData = {}; // Obiekt do przechowywania danych pracowników
+let selectedEmployeeId = null; // Zmienna globalna do przechowywania wybranego ID pracownika
+let savedData = {}; // Obiekt do przechowywania zapisanych danych
+
 function loadDataFromCSV() {
-    fetch('/get-csv-data') // Wczytaj dane z serwera
+    fetch('/frontend/Listapracowników.csv') // Wczytaj dane z serwera
     .then(response => {
         if (!response.ok) {
             throw new Error('Wystąpił problem podczas pobierania danych.');
@@ -11,12 +24,62 @@ function loadDataFromCSV() {
         return response.text();
     })
     .then(csvData => {
-        displayData(csvData); // Wyświetl dane z pliku CSV
+        employeesData = parseCSVData(csvData); // Parsuj i przechowuj dane pracowników
+        displayData(csvData); // Wyświetl dane w tabeli
     })
     .catch(error => {
         console.error('Błąd:', error);
         alert('Wystąpił błąd podczas pobierania danych.');
     });
+}
+
+function loadSavedData() {
+    fetch('/get-saved-data') // Wczytaj zapisane dane z serwera
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Wystąpił problem podczas pobierania danych.');
+        }
+        return response.text();
+    })
+    .then(csvData => {
+        savedData = parseSavedData(csvData); // Parsuj i przechowuj zapisane dane
+    })
+    .catch(error => {
+        console.error('Błąd:', error);
+        alert('Wystąpił błąd podczas pobierania zapisanych danych.');
+    });
+}
+
+function parseCSVData(csvData) {
+    const rows = csvData.split('\n');
+    const data = {};
+    rows.forEach(row => {
+        const rowData = row.split(',');
+        if (rowData.length < 7) return; // Pomijaj niekompletne wiersze
+        const employeeId = rowData[1]; // Zakładam, że ID pracownika jest w kolumnie 1
+        const salary = parseFloat(rowData[6]); // Zakładam, że kwota brutto jest w kolumnie 7
+        const imie = rowData[2]; // Imię pracownika w kolumnie 2
+        const nazwisko = rowData[3]; // Nazwisko pracownika w kolumnie 3
+        data[employeeId] = { salary, imie, nazwisko };
+    });
+    return data;
+}
+
+function parseSavedData(csvData) {
+    const rows = csvData.split('\n');
+    const data = {};
+    rows.forEach(row => {
+        const rowData = row.split(',');
+        if (rowData.length < 7) return; // Pomijaj niekompletne wiersze
+        const employeeId = rowData[0]; // Zakładam, że ID pracownika jest w kolumnie 0
+        const year = rowData[3]; // Rok w kolumnie 3
+        const month = rowData[4]; // Miesiąc w kolumnie 4
+        const hoursWorked = rowData[5]; // Ilość godzin wypracowanych w kolumnie 5
+        const salary = rowData[6]; // Wynagrodzenie w kolumnie 6
+        if (!data[employeeId]) data[employeeId] = {};
+        data[employeeId][`${year}-${month}`] = { hoursWorked, salary };
+    });
+    return data;
 }
 
 function displayData(csvData) {
@@ -25,26 +88,23 @@ function displayData(csvData) {
 
     const rows = csvData.split('\n');
     rows.forEach(row => {
-        // Pomijaj puste wiersze
-        if (row.trim() === '') {
-            return;
-        }
+        if (row.trim() === '') return;
 
         const rowData = row.split(',');
+        if (rowData.length < 7) return;
+
         const tableRow = document.createElement('tr');
 
-        // Dodaj pole wyboru typu radio
         const radioCell = document.createElement('td');
         const radioInput = document.createElement('input');
         radioInput.type = 'radio';
         radioInput.name = 'pracownik';
+        radioInput.value = rowData[1];
         radioCell.appendChild(radioInput);
         tableRow.appendChild(radioCell);
 
-        // Wyświetl tylko dane z pozycji 2, 3 i 4
         for (let i = 1; i <= 3; i++) {
             const tableCell = document.createElement('td');
-            // Zamień dane na wielkie litery
             tableCell.textContent = rowData[i].toUpperCase();
             tableRow.appendChild(tableCell);
         }
@@ -53,83 +113,285 @@ function displayData(csvData) {
 }
 
 document.getElementById("applyFilters").addEventListener("click", function() {
-    // Pobierz wartości wpisane przez użytkownika w pola tekstowe
-    var imieValue = document.getElementById("filterImie").value.toUpperCase();
-    var nazwiskoValue = document.getElementById("filterNazwisko").value.toUpperCase();
+    const imieValue = document.getElementById("filterImie").value.toUpperCase();
+    const nazwiskoValue = document.getElementById("filterNazwisko").value.toUpperCase();
+    const rows = document.querySelectorAll("#tableBody tr");
 
-    // Pobierz wszystkie wiersze tabeli
-    var rows = document.querySelectorAll("#tableBody tr");
-
-    // Iteruj przez każdy wiersz tabeli
     rows.forEach(function(row) {
-        // Pobierz wartości imienia i nazwiska z danego wiersza
-        var imie = row.cells[2].textContent.toUpperCase(); // Indeks 2 odpowiada kolumnie z imieniem
-        var nazwisko = row.cells[3].textContent.toUpperCase(); // Indeks 3 odpowiada kolumnie z nazwiskiem
+        const imie = row.cells[2].textContent.toUpperCase();
+        const nazwisko = row.cells[3].textContent.toUpperCase();
 
-        // Sprawdź, czy wprowadzone przez użytkownika imię lub nazwisko pasuje do imienia lub nazwiska w danym wierszu
-        // Jeśli pasuje, pokaż ten wiersz, w przeciwnym razie ukryj
         if (imie.includes(imieValue) && nazwisko.includes(nazwiskoValue)) {
-            row.style.display = ""; // Pokaż wiersz
+            row.style.display = "";
         } else {
-            row.style.display = "none"; // Ukryj wiersz
+            row.style.display = "none";
         }
     });
 });
 
-document.getElementById("button7").addEventListener("click", function() {
-    // Pobierz wszystkie radio buttons
-    var radioButtons = document.querySelectorAll('input[type="radio"][name="pracownik"]');
-    
-    var selectedRow = null;
-    
-    // Sprawdź, który wiersz jest zaznaczony
-    for (var i = 0; i < radioButtons.length; i++) {
+function hideFutureYears() {
+    const select = document.getElementById("mySelect");
+    const currentYear = new Date().getFullYear();
+
+    for (let i = 0; i < select.options.length; i++) {
+        const year = parseInt(select.options[i].text);
+        if (year > currentYear) {
+            select.options[i].style.display = 'none';
+        }
+    }
+}
+
+function handleEmployeeSelection() {
+    const radioButtons = document.querySelectorAll('input[type="radio"][name="pracownik"]');
+    let selectedRow = null;
+
+    for (let i = 0; i < radioButtons.length; i++) {
         if (radioButtons[i].checked) {
-            selectedRow = radioButtons[i].parentNode.parentNode; // Pobierz rodzica rodzica, czyli <tr>
+            selectedRow = radioButtons[i].parentNode.parentNode;
+            selectedEmployeeId = radioButtons[i].value;
             break;
         }
     }
-    
     if (selectedRow) {
-        // Ukryj pola tekstowe do filtrowania danych
         document.getElementById("filter-container").style.display = "none";
-    
-        // Ukryj przycisk "Wybierz Pracownika"
         document.getElementById("button7").style.display = "none";
-    
-        // Ukryj aktualną tabelę
         document.getElementById("tableBody").style.display = "none";
-    
-        // Ukryj stare nagłówki tabeli
         document.querySelector('table thead').style.display = "none";
-    
-        // Utwórz nową tabelę
-        var newTable = document.createElement('table');
-        newTable.innerHTML = `
-            <thead>
-                <tr>
-                    <th>Miesiąc</th>
-                    <th>Ilość godzin do przepracowania</th>
-                    <th>Ilość godzin wypracowanych</th>
-                    <th>Wynagrodzenie</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Dane miesiąca</td>
-                    <td>Dane ilości godzin do przepracowania</td>
-                    <td>Dane ilości godzin wypracowanych</td>
-                    <td>Dane wynagrodzenia</td>
-                </tr>
-            </tbody>
-        `;
-    
-        // Dodaj nową tabelę do dokumentu
-        document.body.appendChild(newTable);
+        document.querySelector('table').style.display = "none";
+
+        buildTableForYear();
     } else {
         alert("Proszę wybrać pracownika.");
     }
-    
-});
-    
+}
 
+function buildTableForYear() {
+    const select = document.getElementById("mySelect");
+    const selectedOption = select.options[select.selectedIndex];
+    const selectedYear = parseInt(selectedOption.text);
+
+    const months = [
+        "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
+        "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
+    ];
+
+    const existingTable = document.getElementById("yearTable");
+    if (existingTable) existingTable.remove();
+
+    const table = document.createElement('table');
+    table.id = "yearTable";
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>Rok</th>
+                <th>Miesiąc</th>
+                <th>Liczba godzin pracy</th>
+                <th>Ilość godzin wypracowanych</th>
+                <th>Wynagrodzenie</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    `;
+
+    const tbody = table.querySelector('tbody');
+
+    months.forEach((month, index) => {
+        const year = selectedYear;
+        const monthIndex = index;
+
+        const workHours = calculateWorkHours(year, monthIndex);
+        const key = `${year}-${month}`;
+        const savedEntry = savedData[selectedEmployeeId] ? savedData[selectedEmployeeId][key] : null;
+
+        const hoursWorked = savedEntry ? savedEntry.hoursWorked : '';
+        const salary = savedEntry ? savedEntry.salary : '';
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${year}</td>
+            <td>${month}</td>
+            <td>${workHours}</td>
+            <td>
+                <span class="hours-worked-text">${hoursWorked}</span>
+                <input type="text" class="hours-worked-input" style="display:none;" />
+                <button class="edit-button">✏️</button>
+                <button class="save-button" style="display:none;">✔️</button>
+            </td>
+            <td class="salary-cell">${salary}</td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    document.body.appendChild(table);
+
+    document.querySelectorAll('.edit-button').forEach(button => {
+        button.addEventListener('click', function () {
+            const td = this.parentElement;
+            const span = td.querySelector('.hours-worked-text');
+            const input = td.querySelector('.hours-worked-input');
+            const saveButton = td.querySelector('.save-button');
+
+            span.style.display = 'none';
+            input.style.display = 'inline';
+            saveButton.style.display = 'inline';
+            this.style.display = 'none';
+            input.value = span.textContent;
+            input.focus();
+        });
+    });
+
+    document.querySelectorAll('.save-button').forEach(button => {
+        button.addEventListener('click', function () {
+            saveHoursWorked(this, selectedEmployeeId);
+        });
+    });
+
+    document.querySelectorAll('.hours-worked-input').forEach(input => {
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                saveHoursWorked(this.nextElementSibling, selectedEmployeeId);
+            }
+        });
+    });
+}
+
+function saveHoursWorked(button, employeeId) {
+    const td = button.parentElement;
+    const span = td.querySelector('.hours-worked-text');
+    const input = td.querySelector('.hours-worked-input');
+    const editButton = td.querySelector('.edit-button');
+    const salaryCell = td.parentElement.querySelector('.salary-cell');
+
+    const hoursWorked = parseFloat(input.value);
+    const salaryRate = employeesData[employeeId]?.salary || 0;
+    const salary = hoursWorked * salaryRate;
+
+    const formattedSalary = salary.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' PLN';
+
+    span.textContent = hoursWorked;
+    salaryCell.textContent = formattedSalary;
+
+    span.style.display = 'inline';
+    input.style.display = 'none';
+    button.style.display = 'none';
+    editButton.style.display = 'inline';
+}
+
+function calculateWorkHours(year, month) {
+    const holidays = getHolidays(year);
+    let workDays = 0;
+    let daysOff = 0;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    let additionalDaysOff = 0;
+
+    holidays.forEach(holiday => {
+        if (holiday.getDay() === 6 && holiday.getMonth() === month) {
+            additionalDaysOff++;
+        }
+    });
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const currentDate = new Date(year, month, day);
+        const isWeekend = (currentDate.getDay() === 0 || currentDate.getDay() === 6);
+        const isHoliday = holidays.some(holiday =>
+            holiday.getDate() === currentDate.getDate() &&
+            holiday.getMonth() === currentDate.getMonth()
+        );
+
+        if (isHoliday) {
+            daysOff++;
+        }
+
+        if (!isWeekend && !isHoliday) {
+            workDays++;
+        }
+    }
+
+    daysOff += additionalDaysOff;
+
+    const workHours = workDays * 8;
+
+    return workHours;
+}
+
+function getHolidays(year) {
+    return [
+        new Date(year, 0, 1),   // Nowy Rok
+        new Date(year, 0, 6),   // Trzech Króli
+        calculateEasterMonday(year), // Poniedziałek Wielkanocny
+        new Date(year, 4, 1),   // Święto Pracy
+        new Date(year, 4, 3),   // Święto Konstytucji 3 Maja
+        calculateCorpusChristi(year), // Boże Ciało
+        new Date(year, 7, 15),  // Wniebowzięcie Najświętszej Maryi Panny
+        new Date(year, 10, 1),  // Wszystkich Świętych
+        new Date(year, 10, 11), // Narodowe Święto Niepodległości
+        new Date(year, 11, 25), // Boże Narodzenie
+        new Date(year, 11, 26)  // Drugi dzień Bożego Narodzenia
+    ];
+}
+
+function calculateEasterMonday(year) {
+    const f = Math.floor,
+        G = year % 19,
+        C = f(year / 100),
+        H = (C - f(C / 4) - f((8 * C + 13) / 25) + 19 * G + 15) % 30,
+        I = H - f(H / 28) * (1 - f(29 / (H + 1)) * f((21 - G) / 11)),
+        J = (year + f(year / 4) + I + 2 - C + f(C / 4)) % 7,
+        L = I - J,
+        month = 3 + f((L + 40) / 44),
+        day = L + 28 - 31 * f(month / 4);
+
+    const easterSunday = new Date(year, month - 1, day);
+    const easterMonday = new Date(easterSunday);
+    easterMonday.setDate(easterSunday.getDate() + 1);
+
+    return easterMonday;
+}
+
+function calculateCorpusChristi(year) {
+    const easterMonday = calculateEasterMonday(year);
+    const corpusChristi = new Date(easterMonday);
+    corpusChristi.setDate(easterMonday.getDate() + 59);
+    return corpusChristi;
+}
+
+// Funkcja do zapisywania tabeli do pliku CSV na serwerze
+function saveTableToServer() {
+    const table = document.getElementById("yearTable");
+    if (!table) {
+        alert('Tabela nie istnieje.');
+        return;
+    }
+
+    let csvContent = "ID,Imię,Nazwisko,Rok,Miesiąc,Ilość godzin wypracowanych,Wynagrodzenie\n"; // Nagłówki CSV
+    const rows = table.querySelectorAll("tbody tr");
+    rows.forEach(row => {
+        const year = row.children[0].textContent;
+        const month = row.children[1].textContent;
+        const workHours = row.children[2].textContent;
+        const hoursWorked = row.children[3].querySelector('.hours-worked-text').textContent;
+        const salary = row.children[4].textContent;
+        const employee = employeesData[selectedEmployeeId];
+        const rowData = [selectedEmployeeId, employee.imie, employee.nazwisko, year, month, hoursWorked, salary];
+        csvContent += rowData.join(",") + "\n";
+    });
+
+    fetch('/save-employee-data', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'text/plain'
+        },
+        body: csvContent
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Wystąpił problem podczas zapisywania danych.');
+        }
+        alert('Dane zostały zapisane pomyślnie.');
+    })
+    .catch(error => {
+        console.error('Błąd:', error);
+        alert('Wystąpił błąd podczas zapisywania danych.');
+    });
+}
