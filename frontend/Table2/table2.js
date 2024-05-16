@@ -147,7 +147,7 @@ function handleEmployeeSelection() {
 
     for (let i = 0; i < radioButtons.length; i++) {
         if (radioButtons[i].checked) {
-            selectedRow = radioButtons[i].parentNode.parentNode;
+            selectedRow = radioButtons[i].parentElement.parentElement;
             selectedEmployeeId = radioButtons[i].value;
             break;
         }
@@ -358,40 +358,74 @@ function calculateCorpusChristi(year) {
 
 // Funkcja do zapisywania tabeli do pliku CSV na serwerze
 function saveTableToServer() {
-    const table = document.getElementById("yearTable");
-    if (!table) {
-        alert('Tabela nie istnieje.');
-        return;
-    }
-
-    let csvContent = "ID,Imię,Nazwisko,Rok,Miesiąc,Ilość godzin wypracowanych,Wynagrodzenie\n"; // Nagłówki CSV
-    const rows = table.querySelectorAll("tbody tr");
-    rows.forEach(row => {
-        const year = row.children[0].textContent;
-        const month = row.children[1].textContent;
-        const workHours = row.children[2].textContent;
-        const hoursWorked = row.children[3].querySelector('.hours-worked-text').textContent;
-        const salary = row.children[4].textContent;
-        const employee = employeesData[selectedEmployeeId];
-        const rowData = [selectedEmployeeId, employee.imie, employee.nazwisko, year, month, hoursWorked, salary];
-        csvContent += rowData.join(",") + "\n";
-    });
-
-    fetch('/save-employee-data', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'text/plain'
-        },
-        body: csvContent
-    })
+    fetch('/get-saved-data')
     .then(response => {
         if (!response.ok) {
-            throw new Error('Wystąpił problem podczas zapisywania danych.');
+            throw new Error('Wystąpił problem podczas pobierania danych.');
         }
-        alert('Dane zostały zapisane pomyślnie.');
+        return response.text();
+    })
+    .then(existingData => {
+        const existingRows = existingData.split('\n').filter(line => line.trim() !== '');
+        let csvContent = "ID,Imię,Nazwisko,Rok,Miesiąc,Ilość godzin wypracowanych,Wynagrodzenie\n"; // Nagłówki CSV
+
+        const table = document.getElementById("yearTable");
+        if (!table) {
+            alert('Tabela nie istnieje.');
+            return;
+        }
+
+        const rows = table.querySelectorAll("tbody tr");
+        rows.forEach(row => {
+            const year = row.children[0].textContent;
+            const month = row.children[1].textContent;
+            const workHours = row.children[2].textContent;
+            const hoursWorked = row.children[3].querySelector('.hours-worked-text').textContent;
+            const salary = row.children[4].textContent;
+            const employee = employeesData[selectedEmployeeId];
+            const newRowData = [selectedEmployeeId, employee.imie, employee.nazwisko, year, month, hoursWorked, salary];
+            let found = false;
+
+            // Update the existing data with the new row data
+            for (let i = 1; i < existingRows.length; i++) { // Start from 1 to skip the header
+                const existingRowData = existingRows[i].split(',');
+                if (existingRowData[0] === selectedEmployeeId && existingRowData[3] === year && existingRowData[4] === month) {
+                    existingRows[i] = newRowData.join(",");
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                existingRows.push(newRowData.join(","));
+            }
+        });
+
+        csvContent += existingRows.join("\n");
+
+        fetch('/save-employee-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: csvContent
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Wystąpił problem podczas zapisywania danych.');
+            }
+            alert('Dane zostały zapisane pomyślnie.');
+        })
+        .catch(error => {
+            console.error('Błąd:', error);
+            alert('Wystąpił błąd podczas zapisywania danych.');
+        });
     })
     .catch(error => {
         console.error('Błąd:', error);
-        alert('Wystąpił błąd podczas zapisywania danych.');
+        alert('Wystąpił błąd podczas pobierania zapisanych danych.');
     });
 }
+
+
+

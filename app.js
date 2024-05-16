@@ -81,17 +81,45 @@ app.get('/get-csv-data', (req, res) => {
 });
 
 app.post('/save-employee-data', (req, res) => {
-    const csvContent = req.body;
+    const newRecords = req.body.split('\n').filter(line => line.trim() !== "");
+    const filePath = 'frontend/rozliczeniePracownika.csv';
 
-    fs.writeFile('frontend/rozliczeniePracownika.csv', csvContent, 'utf8', (err) => {
+    fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {
             console.error(err);
-            res.status(500).send('Wystąpił błąd podczas zapisywania danych.');
-        } else {
-            res.send('Dane zostały zapisane pomyślnie.');
+            res.status(500).send('Wystąpił błąd podczas odczytu danych.');
+            return;
         }
+
+        const existingRecords = data.split('\n').filter(line => line.trim() !== "");
+        const header = existingRecords.shift();
+        const combinedRecords = new Map();
+
+        existingRecords.forEach(record => {
+            const [id, imie, nazwisko, rok, miesiac, godziny, wynagrodzenie] = record.split(',');
+            const key = `${id}-${rok}-${miesiac}`;
+            combinedRecords.set(key, record);
+        });
+
+        newRecords.forEach(record => {
+            const [id, imie, nazwisko, rok, miesiac, godziny, wynagrodzenie] = record.split(',');
+            const key = `${id}-${rok}-${miesiac}`;
+            combinedRecords.set(key, record);
+        });
+
+        const updatedRecords = [header, ...combinedRecords.values()].join('\n');
+
+        fs.writeFile(filePath, updatedRecords, 'utf8', err => {
+            if (err) {
+                console.error(err);
+                res.status(500).send('Wystąpił błąd podczas zapisywania danych.');
+            } else {
+                res.send('Dane zostały zapisane pomyślnie.');
+            }
+        });
     });
 });
+
 
 app.get('/get-saved-data', (req, res) => {
     fs.readFile('frontend/rozliczeniePracownika.csv', 'utf8', (err, data) => {
