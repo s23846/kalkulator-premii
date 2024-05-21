@@ -1,3 +1,4 @@
+//OBSŁUGA ROZLICZENIA PODSTAWOWEGO
 document.addEventListener("DOMContentLoaded", function() {
     loadDataFromCSV();
     loadSavedData();

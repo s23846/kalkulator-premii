@@ -36,7 +36,7 @@ tbody td {
     color: black;
 }
 
-#button1, #button2, #button3, #button4, #button5, #button6, #button7, #applyFilters, #button8 {
+#button1, #button2, #button3, #button4, #button5, #button6, #button7, #applyFilters, #button8, #button9 {
     background-color: #A5A6BD; /* Zielony kolor tła */
     color: black; /* Biały kolor tekstu */
     padding: 10px 20px; /* Wielkość wypełnienia */
@@ -49,16 +49,15 @@ tbody td {
     margin-right: 15px;
 }
 
-#button1:hover, #button2:hover, #button3:hover, #button4:hover ,#button5:hover, #button6:hover, #button7:hover, #applyFilters:hover, #button8:hover{
+#button1:hover, #button2:hover, #button3:hover, #button4:hover ,#button5:hover, #button6:hover, #button7:hover, #applyFilters:hover, #button8:hover, #button9:hover{
     background-color: rgba(199, 210, 240, 0.50); /* Ciemniejszy zielony kolor tła po najechaniu myszką */
     font-weight: bold;
 }
 
-
-    tbody td.null {
-        color: gray;
-        text-align: center;
-    }
+tbody td.null {
+    color: gray;
+    text-align: center;
+}
 
 /* Responsive Adjustments */
 @media screen and (max-width: 768px) {
@@ -84,7 +83,7 @@ input[type="text"] {
     font-size: 14px; /* Ustawienie rozmiaru czcionki */
 }
 
-#mySelect{
+#mySelect {
     width: 200px;
     margin-right: 15px;
     margin-top: 20px;
@@ -92,3 +91,56 @@ input[type="text"] {
     border-radius: 5px;
     border: 1px solid #ccc;
 }
+
+#premiRodzaj, #rentowność, #KPI {
+    position: absolute;
+    left: 10px; /* Odległość od lewej krawędzi */
+    width: 320px; /* Szerokość tabeli */
+    border: 1px solid #B9B9B9; /* Obramowanie tabeli */
+    border-collapse: collapse;
+    background-color: #F2F3F5;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#premiRodzaj {
+    top: 100px; /* Odległość od górnej krawędzi */
+}
+
+#rentowność {
+    top: 300px; /* Odległość od górnej krawędzi, aby umieścić ją pod poprzednią tabelą */
+}
+
+#KPI {
+    top: 500px; /* Odległość od górnej krawędzi, aby umieścić ją pod poprzednią tabelą */
+}
+
+#premiRodzaj th, #premiRodzaj td, #rentowność th, #rentowność td, #KPI th, #KPI td {
+    border: 1px solid #B9B9B9;
+    padding: 10px; /* Padding */
+    text-align: left;
+    font-size: 14px; /* Rozmiar czcionki */
+}
+
+#premiRodzaj thead th, #rentowność thead th, #KPI thead th {
+    background-color: rgba(199, 210, 240, 0.50);
+    color: black;
+    font-weight: 600;
+    font-size: 14px; /* Rozmiar czcionki */
+}
+
+#premiRodzaj tbody tr:nth-child(even), #rentowność tbody tr:nth-child(even), #KPI tbody tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.50);
+}
+
+#premiRodzaj tbody tr:nth-child(odd), #rentowność tbody tr:nth-child(odd), #KPI tbody tr:nth-child(odd) {
+    background-color: rgba(199, 210, 240, 0.25);
+}
+
+#premiRodzaj tbody td, #rentowność tbody td, #KPI tbody td {
+    font-weight: 400;
+    font-size: 14px; /* Rozmiar czcionki */
+    color: black;
+}
+

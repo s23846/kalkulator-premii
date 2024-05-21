@@ -5,14 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Strona Główna</title>
     <script src="/frontend/Header/header.js"></script>
+    <link rel=" stylesheet" href="/frontend/Table/table.css" />
 </head>
 <body>
 
     <!--Nagłówek interaktywny-->
     <div id="header-container"></div>
-    <div>
-        <h1>Hello word 3</h1>
-    </div>
+
+    <table id="premiRodzaj" border="1">
+        <thead>
+            <tr>
+                <th>Wybierz</th>
+                <th>Typ rozliczenia</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <tr>
+            <td><input type="radio" name="rodzajPremii"></td>
+            <td>Miesięczne</td>
+        </tr>
+        <tr>
+            <td><input type="radio" name="rodzajPremii"></td>
+            <td>Kwartalne</td>
+        </tr>
+        <tr>
+        <td><input type="radio" name="rodzajPremii"></td>
+        <td>Roczna</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <table id="rentowność" border="1">
+        <thead>
+            <tr>
+                <th>Od</th>
+                <th>Do</th>
+                <th>Procent</th>
+                <th>Max</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody2">
+        </tbody>
+    </table>
+
+    <table id="KPI" border="1">
+        <thead>
+            <tr>
+                <th>ID KPI</th>
+                <th>Nazwa KPI</th>
+                <th>Wagi KPI</th>
+                <th>Max</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody3">
+        </tbody>
+    </table>
+
+
 
 </body>
 </html>
