@@ -144,3 +144,23 @@ input[type="text"] {
     color: black;
 }
 
+#labels-container {
+    /* Inne style */
+    width: 200px; /* Ustawienie szerokości */
+    padding: 8px; /* Dodanie wypełnienia */
+    border: 1px solid #ccc; /* Dodanie obramowania */
+    border-radius: 5px; /* Zaokrąglenie rogów */
+    font-size: 14px; /* Ustawienie rozmiaru czcionki */
+    color: black; /* Kolor tekstu */
+    background-color: #F2F3F5; /* Kolor tła */
+    font-weight: bold; /* Pogrubienie tekstu */
+    display: flex; /* Ustawienie kontenera na flexbox */
+    justify-content: center; /* Wyśrodkowanie zawartości względem osi poziomej */
+    align-items: center; /* Wyśrodkowanie zawartości względem osi pionowej */
+    position: absolute; /* Pozycja bezwzględna */
+    top: 100px; /* Odległość od górnej krawędzi strony */
+    left: 50%; /* Wyśrodkowanie w poziomie */
+    transform: translateX(-50%); /* Przesunięcie o połowę szerokości elementu w lewo */
+}
+
+

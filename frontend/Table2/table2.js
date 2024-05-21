@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function() {
     hideFutureYears();
     document.getElementById("button7").addEventListener("click", handleEmployeeSelection);
     document.getElementById("button8").addEventListener("click", saveTableToServer);
+    document.getElementById("button9").addEventListener("click", handleBonusSelection);
     document.getElementById("mySelect").addEventListener("change", function() {
         if (document.querySelector('table').style.display === "none") {
             buildTableForYear(selectedEmployeeId);
@@ -428,5 +429,35 @@ function saveTableToServer() {
     });
 }
 
+function handleBonusSelection() {
+    var radios = document.querySelectorAll('input[name="pracownik"]');
+    var selectedEmployee = null;
+    for (var radio of radios) {
+        if (radio.checked) {
+            selectedEmployee = radio;
+            break;
+        }
+    }
+
+    if (selectedEmployee) {
+        var employeeId = selectedEmployee.value;
+        var employeeRow = selectedEmployee.closest('tr');
+        var employeeName = employeeRow.cells[2].textContent;
+        var employeeSurname = employeeRow.cells[3].textContent;
+
+         // Zapis danych do lokalnego przechowywania
+         localStorage.setItem('selectedEmployeeId', employeeId);
+         localStorage.setItem('selectedEmployeeName', employeeName);
+         localStorage.setItem('selectedEmployeeSurname', employeeSurname);
+
+        // Przypieszenie przekierowania poprzez usunięcie opóźnienia
+        window.location.href = `http://localhost:3005/premie.html?id=${employeeId}&name=${encodeURIComponent(employeeName)}&surname=${encodeURIComponent(employeeSurname)}`;
+
+        // Tworzenie etykiet na nowej stronie
+        createLabels(employeeId, employeeName, employeeSurname);
+    } else {
+        alert('Proszę wybrać pracownika.');
+    }
+}
 
 
