@@ -36,7 +36,7 @@ tbody td {
     color: black;
 }
 
-#button1, #button2, #button3, #button4, #button5, #button6, #button7, #applyFilters, #button8, #button9 {
+#button1, #button2, #button3, #button4, #button5, #button6, #button7, #applyFilters, #button8, #button9, #button10, #button11, #button12, #button13, #button14, #button15 {
     background-color: #A5A6BD; /* Zielony kolor tła */
     color: black; /* Biały kolor tekstu */
     padding: 10px 20px; /* Wielkość wypełnienia */
@@ -49,7 +49,7 @@ tbody td {
     margin-right: 15px;
 }
 
-#button1:hover, #button2:hover, #button3:hover, #button4:hover ,#button5:hover, #button6:hover, #button7:hover, #applyFilters:hover, #button8:hover, #button9:hover{
+#button1:hover, #button2:hover, #button3:hover, #button4:hover ,#button5:hover, #button6:hover, #button7:hover, #applyFilters:hover, #button8:hover, #button9:hover, #button10:hover, #button11:hover, #button12:hover, #button13:hover, #button14:hover, #button15:hover{
     background-color: rgba(199, 210, 240, 0.50); /* Ciemniejszy zielony kolor tła po najechaniu myszką */
     font-weight: bold;
 }
@@ -161,6 +161,18 @@ input[type="text"] {
     top: 100px; /* Odległość od górnej krawędzi strony */
     left: 50%; /* Wyśrodkowanie w poziomie */
     transform: translateX(-50%); /* Przesunięcie o połowę szerokości elementu w lewo */
+}
+
+#input9, #input10{
+    width: 200px;
+}
+
+#labelProjekt, #labelProjekt2{
+    border: 1px solid #B9B9B9;
+    padding: 12px;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    width: 10px;
 }
 
 

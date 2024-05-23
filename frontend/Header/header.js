@@ -25,15 +25,6 @@ function highlightActiveLink() {
     });
 }
 
-// function loadPage(pageUrl) {
-//     fetch(pageUrl)
-//         .then(response => response.text())
-//         .then(html => {
-//             document.getElementById('content').innerHTML = html;
-//             highlightActiveLink(); // Refresh active link highlights when new page is loaded
-//         }).catch(err => console.error('Failed to load page: ', err));
-// }
-
 function loadCss() {
     // Get HTML head element
     let head = document.getElementsByTagName('HEAD')[0];

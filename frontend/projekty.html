@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista projektów</title>
+
+    <script src="/frontend/Header/header.js"></script>
+ 
+
+    <link rel=" stylesheet" href="/frontend/Table/table.css" />
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <!-- Nagłówek interaktywny -->
+    <!-- Table structure -->
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Wybierz</th>
+                <th>ID projektu</th>
+                <th>Nazwa projektu</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody2">
+        </tbody>
+    </table>
+
+    <form id="myForm2">
+        <table>
+            <tr>
+                <td id="labelProjekt">
+                    <label for="input8">Podaj <b>ID:</b></label><br>
+                    <input type="text" id="input9">
+                </td>
+                <td id="labelProjekt2">
+                    <label for="input9">Podaj <b>Nazwę projektu:</b></label><br>
+                    <input type="text" id="input10">
+                </td>
+            </tr>
+        </table>
+    </form>
+
+    <button id="button10">Dodaj projekt</button>
+    <button id="button11">Edytuj projekt</button>
+    <button id="button12">Zapisz projekt po edycji</button>
+    <button id="button13">Usuń projekt</button>
+    <button id="button14">Zapisz projekty na serwerze</button>
+        <script src="frontend/table4.js"></script>
+</body>
+</html>
