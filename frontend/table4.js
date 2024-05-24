@@ -4,7 +4,17 @@ const button11 = document.getElementById('button11');
 const button12 = document.getElementById('button12');
 const button13 = document.getElementById('button13');
 const button14 = document.getElementById('button14');
+const button15 = document.getElementById('button15')
 const row = document.getElementById('tableBody2');
+const rentownoscTable = document.getElementById('rentownoscTable');
+
+// Początkowe ukrycie elementów
+rentownoscTable.style.display = "none";
+button16.style.display = "none";
+button17.style.display = "none";
+button18.style.display = "none";
+button19.style.display = "none";
+button20.style.display = "none";
 
 document.getElementById("button10").addEventListener("click", function(event) {
     event.preventDefault(); // Prevent the form from submitting
@@ -216,4 +226,106 @@ function fillTableWithDataProject(csvData) {
         });
         tableBody.appendChild(tableRow);
     });
-}
+
+    document.getElementById("button15").addEventListener("click", function() {
+        // Schowaj wiersze tabeli poza zaznaczonym radiobuttonem
+        const radioButtons = document.querySelectorAll('#tableBody2 input[type="radio"]');
+        radioButtons.forEach(radioButton => {
+            const row = radioButton.closest('tr');
+            if (!radioButton.checked) {
+                row.style.display = 'none'; // Ukryj wiersz
+            }
+        });
+    
+        // Schowaj przyciski od button10 do button15
+        const buttonsToHide = ['button10', 'button11', 'button12', 'button13', 'button14', 'button15'];
+        buttonsToHide.forEach(buttonId => {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                button.style.display = 'none'; // Ukryj przycisk
+            }
+        });
+    
+        // Ukryj formularz
+        document.getElementById("myForm2").style.display = "none";
+
+            // Pokaż tabelę rentowności i przyciski 16-20
+            rentownoscTable.style.display = "table";
+            button16.style.display = "inline-block";
+            button17.style.display = "inline-block";
+            button18.style.display = "inline-block";
+            button19.style.display = "inline-block";
+            button20.style.display = "inline-block";
+
+    });
+
+    document.getElementById("button16").addEventListener("click", function() {
+        // Sprawdź, czy formularz już istnieje
+        if (!document.getElementById('dynamicForm')) {
+            // Utwórz formularz dynamicznie
+            const form = document.createElement('form');
+            form.id = 'dynamicForm';
+            form.innerHTML = `
+                <label for="input1">Od:</label>
+                <input type="text" id="input1"><br>
+                <label for="input2">Do:</label>
+                <input type="text" id="input2"><br>
+                <label for="input3">Procent:</label>
+                <input type="text" id="input3"><br>
+                <button type="button" id="addDataButton">Dodaj</button>
+            `;
+            document.body.appendChild(form);
+    
+            // Dodaj zdarzenie kliknięcia dla przycisku dodawania danych
+            document.getElementById('addDataButton').addEventListener('click', function() {
+                // Pobierz wartości z formularza
+                const input1Value = document.getElementById('input1').value;
+                const input2Value = document.getElementById('input2').value;
+                const input3Value = document.getElementById('input3').value;
+    
+                // Sprawdź, czy wszystkie pola są wypełnione
+                if (input1Value === '' || input2Value === '' || input3Value === '') {
+                    alert("Proszę wypełnić wszystkie pola formularza.");
+                    return;
+                }
+    
+                // Oblicz wartość dla komórki "Max"
+                const max = (parseFloat(input2Value) * parseFloat(input3Value) / 100).toFixed(2); // Zaokrąglenie do dwóch miejsc po przecinku
+    
+                // Dodaj nowy wiersz do tabeli
+                const rentownoscTableBody = document.getElementById('tableBody4');
+                rentownoscTableBody.innerHTML += `<tr>
+                    <td><input type="radio" name="rentownosc"></td>
+                    <td>${input1Value}</td>
+                    <td>${input2Value}</td>
+                    <td>${input3Value}</td>
+                    <td>${max}</td>
+                </tr>`;
+    
+                // Usuń formularz po dodaniu danych
+                form.remove();
+            });
+    
+            // Dodaj nasłuchiwanie zdarzeń zmiany wartości dla inputów 1, 2 i 3
+            document.getElementById('input1').addEventListener('input', updateMax);
+            document.getElementById('input2').addEventListener('input', updateMax);
+            document.getElementById('input3').addEventListener('input', updateMax);
+        }
+    });
+    
+    function updateMax() {
+        // Pobierz wartości z inputów 1, 2 i 3
+        const input1Value = document.getElementById('input1').value;
+        const input2Value = document.getElementById('input2').value;
+        const input3Value = document.getElementById('input3').value;
+    
+        // Oblicz wartość dla komórki "Max"
+        const max = (parseFloat(input2Value) * parseFloat(input3Value) / 100).toFixed(2); // Zaokrąglenie do dwóch miejsc po przecinku
+    
+        // Ustaw wartość dla komórki "Max"
+        document.getElementById('input4').value = max;
+    }
+
+    
+}    
+    

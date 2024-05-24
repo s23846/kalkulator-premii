@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strona Główna</title>
+    <title>Premie Pracownicze</title>
     <script src="/frontend/Header/header.js"></script>
     <link rel=" stylesheet" href="/frontend/Table/table.css" />
 </head>
@@ -11,56 +11,19 @@
 
     <!--Nagłówek interaktywny-->
     <div id="header-container"></div>
-
-    <table id="premiRodzaj" border="1">
+    <table id="projektyDoPremii" border="1">
         <thead>
             <tr>
                 <th>Wybierz</th>
-                <th>Typ rozliczenia</th>
+                <th>ID projektu</th>
+                <th>Nazwa projektu</th>
             </tr>
         </thead>
-        <tbody id="tableBody">
-            <tr>
-            <td><input type="radio" name="rodzajPremii"></td>
-            <td>Miesięczne</td>
-        </tr>
-        <tr>
-            <td><input type="radio" name="rodzajPremii"></td>
-            <td>Kwartalne</td>
-        </tr>
-        <tr>
-        <td><input type="radio" name="rodzajPremii"></td>
-        <td>Roczna</td>
-        </tr>
-        </tbody>
-    </table>
-
-    <table id="rentowność" border="1">
-        <thead>
-            <tr>
-                <th>Od</th>
-                <th>Do</th>
-                <th>Procent</th>
-                <th>Max</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody2">
-        </tbody>
-    </table>
-
-    <table id="KPI" border="1">
-        <thead>
-            <tr>
-                <th>ID KPI</th>
-                <th>Nazwa KPI</th>
-                <th>Wagi KPI</th>
-                <th>Max</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody3">
+        <tbody id="tableBodyProjektyWPremii">
         </tbody>
     </table>
     <div id="labels-container"></div>
     <script src="Table3/table3.js"></script>
+    <script src="frontend/table5.js"></script>
 </body>
 </html>
