@@ -138,7 +138,7 @@ document.getElementById("button14").addEventListener("click", function() {
 });
 
 function saveDataAboutProject() {
-    const rows = document.querySelectorAll("#tableBody tr");
+    const rows = document.querySelectorAll("#tableBody2 tr");
     let csvContent = "";
     rows.forEach(row => {
         const rowData = Array.from(row.children).map(td => td.textContent).join(",");
@@ -162,5 +162,58 @@ function saveDataAboutProject() {
     .catch(error => {
         console.error('Błąd:', error);
         alert('Wystąpił błąd podczas zapisywania danych.');
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    loadDataProjectFromCSV();
+});
+
+function loadDataProjectFromCSV() {
+    fetch('/save-data-project-to-repository')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Wystąpił problem podczas pobierania danych.');
+        }
+        return response.text();
+    })
+    .then(csvData => {
+        fillTableWithDataProject(csvData);
+    })
+    .catch(error => {
+        console.error('Błąd:', error);
+        alert('Wystąpił błąd podczas pobierania danych.');
+    });
+}
+
+function fillTableWithDataProject(csvData) {
+    const tableBody = document.getElementById("tableBody2");
+    tableBody.innerHTML = ''; // Wyczyść zawartość tabeli przed wypełnieniem nowymi danymi
+
+    const rows = csvData.split('\n');
+    rows.forEach(row => {
+        // Pomijaj puste wiersze
+        if (row.trim() === '') {
+            return;
+        }
+
+        const rowData = row.split(',');
+        const tableRow = document.createElement('tr');
+
+        // Dodaj przycisk radio do pierwszej komórki
+        const radioCell = document.createElement('td');
+        const radioInput = document.createElement('input');
+        radioInput.type = 'radio';
+        radioInput.name = 'projekt';
+        radioCell.appendChild(radioInput);
+        tableRow.appendChild(radioCell);
+
+        rowData.forEach(cellData => {
+            const tableCell = document.createElement('td');
+            // Zamień dane na wielkie litery
+            tableCell.textContent = cellData.toUpperCase();
+            tableRow.appendChild(tableCell);
+        });
+        tableBody.appendChild(tableRow);
     });
 }

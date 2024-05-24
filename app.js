@@ -138,8 +138,14 @@ app.get('/get-saved-data', (req, res) => {
 
 app.post('/save-data-project-to-repository', (req, res) => {
     const csvContent = req.body;
-    console.log("Otrzymane dane CSV:", csvContent); // Log received content
- 
+    console.log("Otrzymane dane CSV:", csvContent); // Loguj otrzymane dane
+
+    // Dodaj sprawdzenie, czy dane są prawidłowe
+    if (!csvContent || csvContent.trim() === "") {
+        console.error('Otrzymane dane są puste.');
+        return res.status(400).send('Otrzymane dane są puste.');
+    }
+
     fs.writeFile('frontend/listaProjektów.csv', csvContent, 'utf8', (err) => {
         if (err) {
             console.error('Błąd podczas zapisywania pliku:', err);
@@ -149,7 +155,6 @@ app.post('/save-data-project-to-repository', (req, res) => {
         }
     });
 });
-
 
 app.get('/save-data-project-to-repository', (req, res) => {
     fs.readFile('frontend/listaProjektów.csv', 'utf8', (err, data) => {
