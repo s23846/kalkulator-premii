@@ -326,6 +326,191 @@ function fillTableWithDataProject(csvData) {
         document.getElementById('input4').value = max;
     }
 
+    document.getElementById("button17").addEventListener("click", function() {
+        // Pobierz wszystkie radio buttons
+        var radioButtons = document.querySelectorAll('input[type="radio"][name="rentownosc"]');
+    
+        var selectedRow = null;
+    
+        // Sprawdź, który wiersz jest zaznaczony
+        for (var i = 0; i < radioButtons.length; i++) {
+            if (radioButtons[i].checked) {
+                selectedRow = radioButtons[i].parentNode.parentNode; // Pobierz rodzica rodzica, czyli <tr>
+                break;
+            }
+        }
+        if (selectedRow) {
+            // Pobierz wszystkie komórki w wybranym wierszu
+            var cells = selectedRow.getElementsByTagName("td");
+    
+            // Zamień zawartość każdej komórki (z wyjątkiem pierwszej) na pole tekstowe
+            for (var i = 1; i < cells.length; i++) {
+                if (cells[i].querySelector("input[type='radio']")) {
+                    continue; // Ignoruj kolumnę z przyciskiem typu radio
+                }
+    
+                if (i === 4) {
+                    // Kolumna z wartością maksymalną, pominij edycję
+                    continue;
+                }
+    
+                // Utwórz pole tekstowe
+                var input = document.createElement("input");
+                input.type = "text";
+                input.value = cells[i].textContent; // Przypisz aktualną zawartość komórki jako wartość pola tekstowego
+                cells[i].textContent = ''; // Wyczyść zawartość komórki
+                cells[i].appendChild(input); // Dodaj pole tekstowe do komórki
+            }
+    
+            // Dodaj zdarzenie na zmianę wartości pól, aby automatycznie przeliczać wartość maksymalną
+            var inputFields = selectedRow.querySelectorAll("input[type='text']");
+            inputFields.forEach(function(input) {
+                input.addEventListener('input', updateMaxValue);
+            });
+    
+            function updateMaxValue() {
+                // Pobierz wartości z pól tekstowych
+                var odValue = parseFloat(cells[1].querySelector("input").value);
+                var doValue = parseFloat(cells[2].querySelector("input").value);
+                var procentValue = parseFloat(cells[3].querySelector("input").value);
+    
+                if (!isNaN(doValue) && !isNaN(procentValue)) {
+                    // Oblicz wartość dla komórki "Max"
+                    var max = (doValue * procentValue / 100).toFixed(2); // Zaokrąglenie do dwóch miejsc po przecinku
+    
+                    // Zaktualizuj wartość w komórce "Max"
+                    cells[4].textContent = max;
+                }
+            }
+        } else {
+            alert("Proszę wybrać widełki rentowności do edycji.");
+        }
+    });
+
+    document.getElementById("button18").addEventListener("click", function(event) {
+        event.preventDefault(); // Prevent the default form submission
+        
+        // Pobierz wszystkie radio buttons
+        var radioButtons = document.querySelectorAll('input[type="radio"][name="rentownosc"]');
+        
+        var selectedRow = null;
+        
+        // Sprawdź, który wiersz jest zaznaczony
+        for (var i = 0; i < radioButtons.length; i++) {
+            if (radioButtons[i].checked) {
+                selectedRow = radioButtons[i].parentNode.parentNode; // Pobierz rodzica rodzica, czyli <tr>
+                break;
+            }
+        }
+        
+        if (selectedRow) {
+            // Pobierz wszystkie komórki w wybranym wierszu
+            var cells = selectedRow.getElementsByTagName("td");
+            
+            // Pobierz wartości z pól tekstowych i przelicz wartość "Max"
+            var odValue = parseFloat(cells[1].querySelector("input").value);
+            var doValue = parseFloat(cells[2].querySelector("input").value);
+            var procentValue = parseFloat(cells[3].querySelector("input").value);
+            
+            // Oblicz wartość dla komórki "Max"
+            var max = (doValue * procentValue / 100).toFixed(2); // Zaokrąglenie do dwóch miejsc po przecinku
+            
+            // Zamień pola tekstowe na zwykły tekst, aktualizując wartość "Max"
+            for (var i = 0; i < cells.length; i++) {
+                var input = cells[i].querySelector("input[type='text']");
+                if (input) {
+                    var textNode = document.createTextNode(input.value);
+                    cells[i].textContent = ''; // Wyczyść zawartość komórki
+                    cells[i].appendChild(textNode); // Dodaj tekst do komórki
+                }
+            }
+            
+            // Ustaw obliczoną wartość "Max" w odpowiedniej komórce
+            cells[4].textContent = max;
+
+            //odznacz radio button
+            selectedRadioButton.checked = false;
+        } else {
+            alert("Proszę wybrać widełki rentowności do edycji.");
+        }
+    });
+
+    document.getElementById("button19").addEventListener("click", function(event) {
+        event.preventDefault(); // Prevent the default form submission
+        
+        // Pobierz wszystkie radio buttons
+        var radioButtons = document.querySelectorAll('input[type="radio"][name="rentownosc"]');
+        
+        var selectedRow = null;
+        
+        // Sprawdź, który wiersz jest zaznaczony
+        for (var i = 0; i < radioButtons.length; i++) {
+            if (radioButtons[i].checked) {
+                selectedRow = radioButtons[i].parentNode.parentNode; // Pobierz rodzica rodzica, czyli <tr>
+                break;
+            }
+        }
+        
+        if (selectedRow) {
+            selectedRow.remove(); // Usuń zaznaczony wiersz
+        } else {
+            alert("Proszę wybrać widełki rentowności do usunięcia.");
+        }
+    });
+
+    document.getElementById("button20").addEventListener("click", function() {
+        saveDataToFileRepository();
+    });
+    
+    //TODO FUNKCJA DO NAPRAWY PONIEWAZ AKTUALNIE NADIPUSJE DANE A CHCEMY ABY PO PRZECINKU DOPISAŁA DANE Z TABELI RENTOWNOŚĆ DO PLIKU ORAZ DO DORBIENIA ABY DANE Z PLIKU BYŁY PRAWIDŁOWO ŁADOWANE NA STRONIE I UZUPEŁNIANIE DO ODPOWIEDNICH TABEL
+    function saveDataToFileRepository() {
+        // Pobierz zaznaczony projekt
+        const selectedProject = document.querySelector('#tableBody2 input[type="radio"]:checked');
+        if (!selectedProject) {
+            alert("Proszę wybrać projekt, dla którego wprowadzana jest rentowność.");
+            return;
+        }
+    
+        const projectRow = selectedProject.closest('tr');
+        const projectCells = projectRow.getElementsByTagName('td');
+        const projectId = projectCells[0].textContent; // Id projektu
+        const projectName = projectCells[1].textContent; // Nazwa projektu
+    
+        // Pobierz dane rentowności
+        const rentownoscRows = document.querySelectorAll("#tableBody4 tr");
+        let rentownoscData = "";
+        rentownoscRows.forEach(row => {
+            const rowData = Array.from(row.children).map(td => td.textContent).join(",");
+            rentownoscData += projectId + "," + projectName + "," + rowData + "\n";
+        });
+    
+        // Sprawdź, czy istnieje wpis z tym samym id i nazwą projektu
+        fetch('/save-data-project-to-repository', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain' // Zmiana typu treści na text/plain
+            },
+            body: projectId + ',' + projectName
+        })
+        .then(response => response.text())
+        .then(existingEntry => {
+            if (existingEntry.trim() !== '') {
+                // Jeśli istnieje, uaktualnij istniejący wpis
+                rentownoscData = existingEntry.trim() + ',' + rentownoscData;
+            }
+    
+            // Wywołaj funkcję odpowiedzialną za zapis do pliku z odpowiednimi danymi
+            saveDataToRepository(rentownoscData);
+        })
+        .catch(error => {
+            console.error('Błąd:', error);
+            alert('Wystąpił błąd podczas sprawdzania istniejącego wpisu.');
+        });
+    }
+    
+    
+    
+    
     
 }    
     
