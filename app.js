@@ -306,6 +306,7 @@ app.post('/update-employee-assignments', (req, res) => {
         }
 
         const updatedData = newData.join('\n');
+        console.log('updatedData:', updatedData); // Dodano logowanie zaktualizowanych danych
 
         fs.writeFile(filePath, updatedData, 'utf8', err => {
             if (err) {
