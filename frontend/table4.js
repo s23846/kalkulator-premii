@@ -10,11 +10,13 @@ const rentownoscTable = document.getElementById('rentownoscTable');
 
 // Początkowe ukrycie elementów
 rentownoscTable.style.display = "none";
+employeeToProject.style.display="none";
 button16.style.display = "none";
 button17.style.display = "none";
 button18.style.display = "none";
 button19.style.display = "none";
 button20.style.display = "none";
+addEmployeeToProjectFile.style.display="none";
 
 document.getElementById("button10").addEventListener("click", function(event) {
     event.preventDefault(); // Prevent the form from submitting
@@ -601,3 +603,152 @@ function fillTableWithDataRentability(csvData) {
             alert('Wystąpił problem podczas zapisywania danych.');
         });
     }
+
+    document.getElementById("addEmployeeToProject").addEventListener("click", function() {
+        document.getElementById("addEmployeeToProjectFile").style.display = "inline-block";  
+        // Schowaj wiersze tabeli poza zaznaczonym radiobuttonem
+        const radioButtons = document.querySelectorAll('#tableBody2 input[type="radio"]');
+        radioButtons.forEach(radioButton => {
+            const row = radioButton.closest('tr');
+            if (!radioButton.checked) {
+                row.style.display = 'none'; // Ukryj wiersz
+            }
+        });
+    
+        // Schowaj przyciski od button10 do button15
+        const buttonsToHide = ['button10', 'button11', 'button12', 'button13', 'button14', 'button15', 'addEmployeeToProject', 'button16','button17','button18','button19','button20'];
+        buttonsToHide.forEach(buttonId => {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                button.style.display = 'none'; // Ukryj przycisk
+            }
+        });
+    
+        // Ukryj formularz
+        document.getElementById("myForm2").style.display = "none";
+
+            // Pokaż tabelę pracowników do proejktu
+            employeeToProject.style.display = "table";
+            loadDataEmployeeFromCSVToProject();
+    });
+    
+    function loadDataEmployeeFromCSVToProject() {
+        fetch('/get-data-employee-from-repository-to-project')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Wystąpił problem podczas pobierania danych.');
+            }
+            return response.text();
+        })
+        .then(csvData => {
+            fillTableWithDataEmployeeToProject(csvData);
+        })
+        .catch(error => {
+            console.error('Błąd:', error);
+            alert('Wystąpił błąd podczas pobierania danych.');
+        });
+    }
+    
+    function fillTableWithDataEmployeeToProject(csvData) {
+        const tableBody = document.getElementById("tableBody5");
+        tableBody.innerHTML = ''; // Wyczyść zawartość tabeli przed wypełnieniem nowymi danymi
+    
+        const rows = csvData.split('\n');
+        rows.forEach(row => {
+            if (row.trim() === '') {
+                return; // Pomijaj puste wiersze
+            }
+    
+            const rowData = row.split(',');
+            const tableRow = document.createElement('tr');
+    
+            // Dodaj przycisk checkbox do pierwszej komórki
+            const checkboxCell = document.createElement('td');
+            const checkboxInput = document.createElement('input');
+            checkboxInput.type = 'checkbox';
+            checkboxInput.name = 'pracownik';
+            checkboxInput.id = rowData[1]; // ID pracownika jako identyfikator dla inputa checkbox
+            checkboxInput.value = rowData[1]; // Możesz ustawić wartość na ID pracownika lub inną istotną informację
+            checkboxCell.appendChild(checkboxInput);
+            tableRow.appendChild(checkboxCell);
+    
+            // Dodaj wartości ID pracownika, Imię i Nazwisko do tabeli
+            for (let i = 1; i <= 3; i++) {
+                const tableCell = document.createElement('td');
+                tableCell.textContent = rowData[i] ? rowData[i].toUpperCase() : ''; // Zamień dane na wielkie litery
+                tableRow.appendChild(tableCell);
+            }
+    
+            tableBody.appendChild(tableRow);
+        });
+    }
+
+    document.getElementById("addEmployeeToProjectFile").addEventListener("click", function() {
+        sendSelectedEmployeesData();
+    });
+
+    function sendSelectedEmployeesData() {
+        // Pobierz zaznaczony projekt z tableBody2
+        const selectedProjectRadio = document.querySelector('input[name="projekt"]:checked');
+        if (!selectedProjectRadio) {
+            alert('Wybierz projekt.');
+            return;
+        }
+        
+        const projectRow = selectedProjectRadio.closest('tr');
+        const projectId = projectRow.cells[1].innerText; 
+        const projectName = projectRow.cells[2].innerText; 
+    
+        // Zbierz wszystkie zaznaczone checkboxy z tabeli tableBody5
+        const selectedCheckboxes = document.querySelectorAll('#tableBody5 input[type="checkbox"]:checked');
+    
+        if (selectedCheckboxes.length === 0) {
+            alert('Wybierz przynajmniej jednego pracownika.');
+            return;
+        }
+    
+        // Przygotuj dane pracowników do wysłania
+        const selectedEmployeesData = Array.from(selectedCheckboxes).map(checkbox => {
+            const employeeRow = checkbox.closest('tr');
+            const employeeId = employeeRow.cells[1].innerText;
+            const employeeName = employeeRow.cells[2].innerText;
+            const employeeSurname = employeeRow.cells[3].innerText;
+            
+            return {
+                employeeId,
+                employeeName,
+                employeeSurname
+            };
+        });
+    
+        // Przygotuj dane do wysłania, włączając informacje o projekcie
+        const dataToSend = {
+            projectId,
+            projectName,
+            employees: selectedEmployeesData
+        };
+    
+        // Wysyłka danych do serwera
+        fetch('/update-employee-assignments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataToSend)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Wystąpił problem podczas zapisywania danych.');
+            }
+            return response.text();
+        })
+        .then(result => {
+            console.log(result);
+            alert('Przypisanie pracowników zaktualizowane pomyślnie.');
+        })
+        .catch(error => {
+            console.error('Błąd:', error);
+            alert('Wystąpił problem podczas zapisywania danych.');
+        });
+    }
+    
