@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function loadDataProjectFromCSV() {
-    fetch('/save-data-project-to-repository')
+    fetch('/get-data-project-from-repository')
     .then(response => {
         if (!response.ok) {
             throw new Error('Wystąpił problem podczas pobierania danych.');
@@ -215,17 +215,20 @@ function fillTableWithDataProject(csvData) {
         const radioInput = document.createElement('input');
         radioInput.type = 'radio';
         radioInput.name = 'projekt';
+        radioInput.id = rowData[0];
         radioCell.appendChild(radioInput);
         tableRow.appendChild(radioCell);
 
-        rowData.forEach(cellData => {
+        // Dodaj wartości z indeksu 0 i 1 (pierwsza i druga kolumna) do tabeli
+        for (let i = 0; i < 2; i++) {
             const tableCell = document.createElement('td');
-            // Zamień dane na wielkie litery
-            tableCell.textContent = cellData.toUpperCase();
+            tableCell.textContent = rowData[i] ? rowData[i].toUpperCase() : ''; // Zamień dane na wielkie litery
             tableRow.appendChild(tableCell);
-        });
+        }
+
         tableBody.appendChild(tableRow);
     });
+}
 
     document.getElementById("button15").addEventListener("click", function() {
         // Schowaj wiersze tabeli poza zaznaczonym radiobuttonem
@@ -256,8 +259,89 @@ function fillTableWithDataProject(csvData) {
             button18.style.display = "inline-block";
             button19.style.display = "inline-block";
             button20.style.display = "inline-block";
+            loadDataRentabilityFromCSV();
 
     });
+
+function loadDataRentabilityFromCSV() {
+    fetch('/get-data-project-profitability-from-repository')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Wystąpił problem podczas pobierania danych.');
+        }
+        return response.text();
+    })
+    .then(csvData => {
+        console.log('Pobrane dane CSV:', csvData);
+        fillTableWithDataRentability(csvData);
+    })
+    .catch(error => {
+        console.error('Błąd:', error);
+        alert('Wystąpił błąd podczas pobierania danych.');
+    });
+}
+
+function getSelectedProjectId() {
+    const selectedRadio = document.querySelector('input[name="projekt"]:checked');
+    const selectedProjectId = selectedRadio ? selectedRadio.getAttribute('id') : null;
+    console.log('Wybrane ID projektu:', selectedProjectId);
+    return selectedProjectId;
+}
+
+function fillTableWithDataRentability(csvData) {
+    const tableBody = document.getElementById("tableBody4");
+    tableBody.innerHTML = ''; // Wyczyść zawartość tabeli przed wypełnieniem nowymi danymi
+
+    const selectedProjectId = getSelectedProjectId();
+    if (!selectedProjectId) {
+        alert('Proszę wybrać projekt.');
+        return;
+    }
+
+    const rows = csvData.split('\n');
+    console.log('Wiersze CSV:', rows);
+    
+    rows.forEach((row, index) => {
+        // Pomijaj puste wiersze
+        if (row.trim() === '') {
+            return;
+        }
+
+        const rowData = row.split(',');
+        console.log('Dane wiersza:', rowData);
+
+        const projectId = rowData[0]; // Załóżmy, że ID projektu jest na indeksie 0
+        console.log('ID projektu w wierszu:', projectId);
+
+        if (projectId !== selectedProjectId) {
+            return;
+        }
+
+        const rentabilityData = rowData.slice(2, 6); // Wybierz odpowienie kolumny z pliku rentowności
+        console.log('Dane rentowności:', rentabilityData);
+
+        const tableRow = document.createElement('tr');
+
+        // Dodaj przycisk radio do pierwszej komórki
+        const radioCell = document.createElement('td');
+        const radioInput = document.createElement('input');
+        radioInput.type = 'radio';
+        radioInput.name = 'rentownosc';
+        radioCell.appendChild(radioInput);
+        tableRow.appendChild(radioCell);
+
+        // Dodaj dane rentowności do kolejnych komórek
+        rentabilityData.forEach(cellData => {
+            const tableCell = document.createElement('td');
+            // Zamień dane na wielkie litery
+            tableCell.textContent = cellData.toUpperCase();
+            tableRow.appendChild(tableCell);
+        });
+
+        tableBody.appendChild(tableRow);
+        console.log('Dodano wiersz do tabeli:', tableRow);
+    });
+}    
 
     document.getElementById("button16").addEventListener("click", function() {
         // Sprawdź, czy formularz już istnieje
@@ -272,6 +356,8 @@ function fillTableWithDataProject(csvData) {
                 <input type="text" id="input2"><br>
                 <label for="input3">Procent:</label>
                 <input type="text" id="input3"><br>
+                <label for="input4">Max:</label>
+               <input type="text" id="input4" disabled><br> 
                 <button type="button" id="addDataButton">Dodaj</button>
             `;
             document.body.appendChild(form);
@@ -457,60 +543,61 @@ function fillTableWithDataProject(csvData) {
             alert("Proszę wybrać widełki rentowności do usunięcia.");
         }
     });
-
+    
     document.getElementById("button20").addEventListener("click", function() {
-        saveDataToFileRepository();
+        updateProjectProfitability();
     });
     
-    //TODO FUNKCJA DO NAPRAWY PONIEWAZ AKTUALNIE NADIPUSJE DANE A CHCEMY ABY PO PRZECINKU DOPISAŁA DANE Z TABELI RENTOWNOŚĆ DO PLIKU ORAZ DO DORBIENIA ABY DANE Z PLIKU BYŁY PRAWIDŁOWO ŁADOWANE NA STRONIE I UZUPEŁNIANIE DO ODPOWIEDNICH TABEL
-    function saveDataToFileRepository() {
-        // Pobierz zaznaczony projekt
-        const selectedProject = document.querySelector('#tableBody2 input[type="radio"]:checked');
-        if (!selectedProject) {
-            alert("Proszę wybrać projekt, dla którego wprowadzana jest rentowność.");
+    function updateProjectProfitability() {
+        // Pobierz zaznaczony projekt z tableBody2
+        const selectedProjectRadio = document.querySelector('input[name="projekt"]:checked');
+        if (!selectedProjectRadio) {
+            alert('Wybierz projekt.');
             return;
         }
     
-        const projectRow = selectedProject.closest('tr');
-        const projectCells = projectRow.getElementsByTagName('td');
-        const projectId = projectCells[0].textContent; // Id projektu
-        const projectName = projectCells[1].textContent; // Nazwa projektu
-    
-        // Pobierz dane rentowności
-        const rentownoscRows = document.querySelectorAll("#tableBody4 tr");
-        let rentownoscData = "";
-        rentownoscRows.forEach(row => {
-            const rowData = Array.from(row.children).map(td => td.textContent).join(",");
-            rentownoscData += projectId + "," + projectName + "," + rowData + "\n";
+        const projectRow = selectedProjectRadio.closest('tr');
+        const projectId = projectRow.cells[1].innerText; 
+        const projectName = projectRow.cells[2].innerText; 
+
+        // Pobierz dane rentowności z tableBody4
+        const profitabilityRows = document.querySelectorAll("#tableBody4 tr");
+        const profitabilityData = Array.from(profitabilityRows).map(row => {
+            return {
+                od: row.cells[1].innerText,
+                do: row.cells[2].innerText,
+                procenty: row.cells[3].innerText,
+                max: row.cells[4].innerText
+            };
         });
     
-        // Sprawdź, czy istnieje wpis z tym samym id i nazwą projektu
-        fetch('/save-data-project-to-repository', {
+        // Przygotuj dane do wysłania
+        const dataToSend = {
+            projectId,
+            projectName,
+            profitabilityData: profitabilityData.map(d => `${d.od},${d.do},${d.procenty},${d.max}`).join('\n')
+        };
+    
+        // Wysyłka danych do serwera
+        fetch('/update-project-profitability', {
             method: 'POST',
             headers: {
-                'Content-Type': 'text/plain' // Zmiana typu treści na text/plain
+                'Content-Type': 'application/json'
             },
-            body: projectId + ',' + projectName
+            body: JSON.stringify(dataToSend)
         })
-        .then(response => response.text())
-        .then(existingEntry => {
-            if (existingEntry.trim() !== '') {
-                // Jeśli istnieje, uaktualnij istniejący wpis
-                rentownoscData = existingEntry.trim() + ',' + rentownoscData;
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Wystąpił problem podczas zapisywania danych.');
             }
-    
-            // Wywołaj funkcję odpowiedzialną za zapis do pliku z odpowiednimi danymi
-            saveDataToRepository(rentownoscData);
+            return response.text();
+        })
+        .then(result => {
+            console.log(result);
+            alert('Dane zostały zaktualizowane pomyślnie.');
         })
         .catch(error => {
             console.error('Błąd:', error);
-            alert('Wystąpił błąd podczas sprawdzania istniejącego wpisu.');
+            alert('Wystąpił problem podczas zapisywania danych.');
         });
     }
-    
-    
-    
-    
-    
-}    
-    

@@ -156,7 +156,8 @@ app.post('/save-data-project-to-repository', (req, res) => {
     });
 });
 
-app.get('/save-data-project-to-repository', (req, res) => {
+
+app.get('/get-data-project-from-repository', (req, res) => {
     fs.readFile('frontend/listaProjektów.csv', 'utf8', (err, data) => {
         if (err) {
             console.error('Błąd podczas odczytu pliku:', err);
@@ -166,3 +167,165 @@ app.get('/save-data-project-to-repository', (req, res) => {
         res.send(data);
     });
 });
+
+app.post('/update-project-profitability', (req, res) => {
+    console.log(req.body);
+    const {projectId, projectName, profitabilityData } = req.body;
+
+    // Walidacja danych wejściowych
+    if (!projectId || !projectName || !profitabilityData) {
+        console.error('Brakujące dane: ID, nazwa projektu lub dane rentowności.');
+        return res.status(400).send('Brakujące dane: ID, nazwa projektu lub dane rentowności.');
+    }
+
+    if (!/^\d+$/.test(projectId)) { // Sprawdza, czy ID składa się tylko z cyfr
+        console.error('Nieprawidłowe ID projektu.');
+        return res.status(400).send('Nieprawidłowe ID projektu.');
+    }
+
+    if (typeof projectName !== 'string' || projectName.trim().length === 0) {
+        console.error('Nieprawidłowa nazwa projektu.');
+        return res.status(400).send('Nieprawidłowa nazwa projektu.');
+    }
+
+    // Sanitacja danych
+    const cleanProjectName = projectName.replace(/,|;|\r?\n|\r/g, ' '); // Usuwa przecinki, średniki i nowe linie
+    const cleanProfitabilityData = profitabilityData; // Usuwa przecinki, średniki i nowe linie
+
+    const filePath = 'frontend/listaRentownościProjektu.csv';
+
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Błąd odczytu pliku:', err);
+            return res.status(500).send('Błąd serwera.');
+        }
+
+        const lines = data.split('\n').filter(line => line.trim() !== '');
+        let updated = false;
+
+        const newData = lines.map(line => {
+            const [existingId, existingProjectName, ...rest] = line.split(',');
+
+            if (existingId === projectId && existingProjectName === cleanProjectName) {
+                updated = true;
+                return `${projectId},${cleanProjectName},${cleanProfitabilityData}`;
+            }
+
+            return line;
+        });
+
+        if (!updated) {
+            newData.push(`${projectId},${cleanProjectName},${cleanProfitabilityData}`);
+        }
+
+        const updatedData = newData.join('\n');
+
+        fs.writeFile(filePath, updatedData, 'utf8', err => {
+            if (err) {
+                console.error('Błąd zapisu pliku:', err);
+                return res.status(500).send('Błąd serwera.');
+            }
+
+            res.send('Dane zostały zaktualizowane pomyślnie.');
+        });
+    });
+});
+
+app.get('/get-data-project-profitability-from-repository', (req, res) => {
+    fs.readFile('frontend/listaRentownościProjektu.csv', 'utf8', (err, data) => {
+        if (err) {
+            console.error('Błąd podczas odczytu pliku:', err);
+            res.status(500).send('Wystąpił błąd podczas odczytu danych.');
+            return;
+        }
+        res.send(data);
+    });
+});
+
+// app.post('/update-project-profitability', (req, res) => {
+//     const { id, projectName, profitabilityData } = req.body;
+//     const filePath = 'frontend/listaRentownościProjektu.csv';
+
+//     if (!id || !projectName || !profitabilityData) {
+//         return res.status(400).send('Brakujące dane: ID, nazwa projektu lub dane rentowności.');
+//     }
+
+//     fs.readFile(filePath, 'utf8', (err, data) => {
+//         if (err) {
+//             console.error('Błąd podczas odczytu pliku:', err);
+//             return res.status(500).send('Wystąpił błąd podczas odczytu danych.');
+//         }
+
+//         const existingRecords = data.split('\n').filter(line => line.trim() !== "");
+//         const header = existingRecords.shift(); // Zakładamy, że pierwsza linia to nagłówek
+//         const updatedRecords = [];
+
+//         let found = false;
+
+//         existingRecords.forEach(record => {
+//             const [recordId, recordProjectName, ...rest] = record.split(',');
+//             if (recordId === id) {
+//                 // Aktualizujemy istniejący rekord
+//                 let projectName = recordProjectName;
+//                 let remainingData = rest;
+                
+//                 // Sprawdź, czy nazwa projektu zawiera przecinek
+//                 if (recordProjectName.includes(',')) {
+//                     // Jeśli tak, połącz nazwę projektu z kolejnymi danymi
+//                     projectName = rest[0];
+//                     remainingData = rest.slice(1);
+//                 }
+                
+//                 const updatedRecord = [recordId, projectName, ...remainingData, profitabilityData].join(',');
+//                 updatedRecords.push(updatedRecord);
+//                 found = true;
+//             } else {
+//                 updatedRecords.push(record);
+//             }
+//         });
+        
+        
+        
+        
+//         if (!found) {
+//             // Dodajemy nowy rekord, jeśli nie znaleziono pasującego
+//             const newRecord = [id, projectName, profitabilityData].join(',');
+//             updatedRecords.push(newRecord);
+//         }        
+
+//         const finalData = [header, ...updatedRecords].join('\n');
+
+//         fs.writeFile(filePath, finalData, 'utf8', err => {
+//             if (err) {
+//                 console.error('Błąd podczas zapisywania pliku:', err);
+//                 return res.status(500).send('Wystąpił błąd podczas zapisywania danych.');
+//             }
+
+//             res.send('Dane zostały zaktualizowane pomyślnie.');
+//         });
+//     });
+// });
+
+// app.get('/get-data-project-profitability-from-repository', (req, res) => {
+//     fs.readFile('frontend/listaRentownościProjektu.csv', 'utf8', (err, data) => {
+//         if (err) {
+//             console.error('Błąd podczas odczytu pliku:', err);
+//             res.status(500).send('Wystąpił błąd podczas odczytu danych.');
+//             return;
+//         }
+
+//         const lines = data.split('\n');
+//         const selectedData = lines.map(line => {
+//             const columns = line.split(',');
+//             // Sprawdzenie czy wystarczająca liczba kolumn jest dostępna
+//             if (columns.length > 6) {
+//                 // Wybieranie kolumn 3-6 włącznie
+//                 return `${columns[3]},${columns[4]},${columns[5]},${columns[6]}`;
+//             } else {
+//                 return ''; // Puste w przypadku niewystarczającej liczby kolumn
+//             }
+//         }).filter(line => line !== '').join('\n'); // Usunięcie pustych linii z wyniku
+
+//         res.send(selectedData);
+//     });
+// });
