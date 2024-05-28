@@ -276,9 +276,6 @@ app.post('/update-employee-assignments', (req, res) => {
     // Sanitacja nazwy projektu
     const cleanProjectName = projectName.replace(/,|;|\r?\n|\r/g, ' ');
 
-    // Przygotowanie danych pracowników do zapisu w formacie
-    const employeeData = employees.map(employee => `${employee.employeeId},${employee.employeeName},${employee.employeeSurname}`).join('\n');
-
     const filePath = 'frontend/listaPraconikówPerProjekt.csv';
 
     fs.readFile(filePath, 'utf8', (err, data) => {
@@ -287,28 +284,48 @@ app.post('/update-employee-assignments', (req, res) => {
             return res.status(500).send('Błąd serwera.');
         }
 
-        const lines = data.split('\n').filter(line => line.trim() !== '');
-        let updated = false;
+        // Usuń puste linie i białe znaki
+        const lines = data.split('\n').map(line => line.trim()).filter(line => line !== '');
+        let projectFound = false;
+        let updatedData = [];
+        let newProjectData = [];
 
-        const newData = lines.map(line => {
-            const [existingId, existingProjectName] = line.split(':')[0].replace('Id projektu to: ', '').replace(' Nazwa projektu to: ', '').split(', ');
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.startsWith(`Id projektu to: ${projectId}, Nazwa projektu to: ${cleanProjectName}:`)) {
+                projectFound = true;
+                updatedData.push(line); // Dodaj nagłówek projektu
 
-            if (existingId === projectId && existingProjectName === cleanProjectName) {
-                updated = true;
-                return `Id projektu to: ${projectId}, Nazwa projektu to: ${cleanProjectName}:\n${employeeData}`;
+                const existingEmployees = [];
+                let j = i + 1;
+
+                while (j < lines.length && !lines[j].startsWith('Id projektu to: ')) {
+                    existingEmployees.push(lines[j]);
+                    j++;
+                }
+
+                const existingEmployeeIds = existingEmployees.map(e => e.split(',')[0]);
+
+                const newEmployees = employees.filter(employee => !existingEmployeeIds.includes(employee.employeeId.toString()))
+                    .map(employee => `${employee.employeeId},${employee.employeeName},${employee.employeeSurname}`);
+
+                updatedData = updatedData.concat(existingEmployees, newEmployees);
+                i = j - 1;
+            } else {
+                updatedData.push(line);
             }
-
-            return line;
-        });
-
-        if (!updated) {
-            newData.push(`Id projektu to: ${projectId}, Nazwa projektu to: ${cleanProjectName}:\n${employeeData}`);
         }
 
-        const updatedData = newData.join('\n\n');
-        console.log('updatedData:', updatedData); // Dodano logowanie zaktualizowanych danych
+        if (!projectFound) {
+            newProjectData.push(`Id projektu to: ${projectId}, Nazwa projektu to: ${cleanProjectName}:`);
+            newProjectData = newProjectData.concat(employees.map(employee => `${employee.employeeId},${employee.employeeName},${employee.employeeSurname}`));
+            updatedData = updatedData.concat(newProjectData);
+        }
 
-        fs.writeFile(filePath, updatedData, 'utf8', err => {
+        const finalData = updatedData.join('\n');
+        console.log('updatedData:', finalData); // Dodano logowanie zaktualizowanych danych
+
+        fs.writeFile(filePath, finalData, 'utf8', err => {
             if (err) {
                 console.error('Błąd zapisu pliku:', err);
                 return res.status(500).send('Błąd serwera.');
