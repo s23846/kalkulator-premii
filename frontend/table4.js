@@ -23,6 +23,7 @@ button22.style.display = "none";
 button23.style.display = "none";
 button24.style.display = "none";
 SaveAfterEdition.style.display= "none";
+document.addEventListener('DOMContentLoaded', updateSum);
 
 document.getElementById("button10").addEventListener("click", function(event) {
     event.preventDefault(); // Prevent the form from submitting
@@ -798,6 +799,7 @@ function fillTableWithDataRentability(csvData) {
         // Pokaż tabelę Kpi dla projektu
         KpiForProject.style.display = "table";
         loadDataKPIForProject(); // Wywołaj funkcję, aby zbudować tabelę
+        updateSum();
     });
     
     function fillTableWithDataAboutKpiForProject(csvData) {
@@ -825,6 +827,7 @@ function fillTableWithDataRentability(csvData) {
             
             tableBody.appendChild(tableRow);
         });
+        updateSum();
     }
     
     function loadDataKPIForProject() {
@@ -852,9 +855,27 @@ function fillTableWithDataRentability(csvData) {
             console.error('Błąd:', error);
             alert('Wystąpił błąd podczas pobierania danych.');
         });
+        updateSum();
     }    
     
+    function updateSum() {
+        const weights = document.querySelectorAll('#tableBody6 tr td:nth-child(4)'); // Wybierz komórki z wagą KPI
+        let total = 0;
+        weights.forEach(function(td) {
+            const input = td.querySelector('input') || {value: td.textContent.trim()};
+            total += parseInt(input.value, 10) || 0;
+        });
+        const sumCell = document.getElementById('kpiSumCell');
+        sumCell.textContent = total + '%'; // Aktualizacja komórki sumy
     
+        if (total > 100) {
+            alert('Suma wartości przekracza 100%. Proszę dokonać korekty.');
+            document.getElementById('button24').disabled = true;
+        } else {
+            document.getElementById('button24').disabled = false;
+        }
+    }
+
     document.getElementById("button21").addEventListener("click", function() {
         // Sprawdź, czy formularz już istnieje
         if (!document.getElementById('dynamicForm2')) {
@@ -896,6 +917,7 @@ function fillTableWithDataRentability(csvData) {
     
                 // Usuń formularz po dodaniu danych
                 form.remove();
+                updateSum();
             });
         }
     });
@@ -936,6 +958,7 @@ function fillTableWithDataRentability(csvData) {
         } else {
             alert("Proszę wybrać KPI do edycji.");
         }
+        updateSum();
     });
 
     document.getElementById("SaveAfterEdition").addEventListener("click", function(event) {
@@ -970,6 +993,7 @@ function fillTableWithDataRentability(csvData) {
         } else {
             alert("Proszę wybrać KPI do zapisu po edycji.");
         }
+        updateSum();
     });
 
     document.getElementById("button23").addEventListener("click", function(event) {
@@ -993,6 +1017,7 @@ function fillTableWithDataRentability(csvData) {
         } else {
             alert("Proszę wybrać KPI do usunięcia.");
         }
+        updateSum();
     });
 
     document.getElementById("button24").addEventListener("click", function(event) {
@@ -1080,4 +1105,6 @@ function fillTableWithDataRentability(csvData) {
             alert('Wystąpił problem podczas zapisywania danych.');
         });
     }
+
+
     

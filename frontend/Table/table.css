@@ -184,3 +184,18 @@ td:first-child {
     font-weight: bold;
 }
 
+/* Stylizacja dla sekcji tfoot */
+tfoot {
+    background-color: rgba(199, 210, 240, 0.50); /* Kolor tła dla tfoot */
+    font-weight: bold; /* Pogrubienie tekstu */
+}
+
+tfoot td {
+    border: 1px solid #B9B9B9;
+    padding: 12px;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px; /* Rozmiar czcionki */
+    color: black; /* Kolor tekstu */
+}
+
