@@ -276,8 +276,8 @@ app.post('/update-employee-assignments', (req, res) => {
     // Sanitacja nazwy projektu
     const cleanProjectName = projectName.replace(/,|;|\r?\n|\r/g, ' ');
 
-    // Przygotowanie danych pracowników do zapisu
-    const employeeData = employees.map(employee => `${employee.employeeId},${employee.employeeName},${employee.employeeSurname}`).join(';');
+    // Przygotowanie danych pracowników do zapisu w formacie
+    const employeeData = employees.map(employee => `${employee.employeeId},${employee.employeeName},${employee.employeeSurname}`).join('\n');
 
     const filePath = 'frontend/listaPraconikówPerProjekt.csv';
 
@@ -291,21 +291,21 @@ app.post('/update-employee-assignments', (req, res) => {
         let updated = false;
 
         const newData = lines.map(line => {
-            const [existingId, existingProjectName, ...rest] = line.split(',');
+            const [existingId, existingProjectName] = line.split(':')[0].replace('Id projektu to: ', '').replace(' Nazwa projektu to: ', '').split(', ');
 
             if (existingId === projectId && existingProjectName === cleanProjectName) {
                 updated = true;
-                return `${projectId},${cleanProjectName},${employeeData}`;
+                return `Id projektu to: ${projectId}, Nazwa projektu to: ${cleanProjectName}:\n${employeeData}`;
             }
 
             return line;
         });
 
         if (!updated) {
-            newData.push(`${projectId},${cleanProjectName},${employeeData}`);
+            newData.push(`Id projektu to: ${projectId}, Nazwa projektu to: ${cleanProjectName}:\n${employeeData}`);
         }
 
-        const updatedData = newData.join('\n');
+        const updatedData = newData.join('\n\n');
         console.log('updatedData:', updatedData); // Dodano logowanie zaktualizowanych danych
 
         fs.writeFile(filePath, updatedData, 'utf8', err => {
