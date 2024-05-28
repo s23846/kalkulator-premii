@@ -374,3 +374,121 @@ app.post('/update-employee-assignments', (req, res) => {
         });
     });
 });
+
+app.get('/get-data-KPI-for-project', (req, res) => {
+    const { projectId, projectName } = req.query;
+
+    if (!projectId || !projectName) {
+        return res.status(400).send('Brakujące dane: ID projektu lub nazwa projektu.');
+    }
+
+    fs.readFile('frontend/listaKPIdlaProjektu.csv', 'utf8', (err, kpiData) => {
+        if (err) {
+            console.error('Błąd podczas odczytu pliku:', err);
+            return res.status(500).send('Wystąpił błąd podczas odczytu danych.');
+        }
+
+        const allKpiData = kpiData.split('\n').filter(line => line.trim() !== '');
+
+        let projectKpiData = [];
+
+        let i = 0;
+        while (i < allKpiData.length) {
+            const line = allKpiData[i];
+            if (line.startsWith(`Id projektu to: ${projectId}, Nazwa projektu to: ${projectName}`)) {
+                i++;
+                while (i < allKpiData.length && !allKpiData[i].startsWith('Id projektu to: ')) {
+                    projectKpiData.push(allKpiData[i]);
+                    i++;
+                }
+            } else {
+                i++;
+            }
+        }
+
+        res.send(projectKpiData.join('\n'));
+    });
+});
+
+app.post('/update-kpi-assignments', (req, res) => {
+    console.log(req.body);
+    const { projectId, projectName, KPIs } = req.body;
+
+    // Walidacja danych wejściowych
+    if (!projectId || !projectName || !KPIs || KPIs.length === 0) {
+        console.error('Brakujące dane: ID projektu, nazwa projektu lub dane KPI.');
+        return res.status(400).send('Brakujące dane: ID projektu, nazwa projektu lub dane KPI.');
+    }
+
+    if (!/^\d+$/.test(projectId)) { // Sprawdza, czy ID składa się tylko z cyfr
+        console.error('Nieprawidłowe ID projektu.');
+        return res.status(400).send('Nieprawidłowe ID projektu.');
+    }
+
+    if (typeof projectName !== 'string' || projectName.trim().length === 0) {
+        console.error('Nieprawidłowa nazwa projektu.');
+        return res.status(400).send('Nieprawidłowa nazwa projektu.');
+    }
+
+    // Sanitacja nazwy projektu
+    const cleanProjectName = projectName.replace(/,|;|\r?\n|\r/g, ' ');
+
+    const filePath = 'frontend/listaKPIdlaProjektu.csv';
+
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Błąd odczytu pliku:', err);
+            return res.status(500).send('Błąd serwera.');
+        }
+
+        // Usuń puste linie i białe znaki
+        const lines = data.split('\n').map(line => line.trim()).filter(line => line !== '');
+        let projectFound = false;
+        let updatedData = [];
+        let newProjectData = [];
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.startsWith(`Id projektu to: ${projectId}, Nazwa projektu to: ${cleanProjectName}:`)) {
+                projectFound = true;
+                updatedData.push(line); // Dodaj nagłówek projektu
+
+                const existingKPIs = [];
+                let j = i + 1;
+
+                while (j < lines.length && !lines[j].startsWith('Id projektu to: ')) {
+                    existingKPIs.push(lines[j]);
+                    j++;
+                }
+
+                const existingKPIIds = existingKPIs.map(e => e.split(',')[0]);
+
+                const newKPIs = KPIs.filter(kpi => !existingKPIIds.includes(kpi.KPIId.toString()))
+                    .map(kpi => `${kpi.KPIId},${kpi.KPIName},${kpi.KPIProcent}`);
+
+                updatedData = updatedData.concat(existingKPIs, newKPIs);
+                i = j - 1;
+            } else {
+                updatedData.push(line);
+            }
+        }
+
+        if (!projectFound) {
+            newProjectData.push(`Id projektu to: ${projectId}, Nazwa projektu to: ${cleanProjectName}:`);
+            newProjectData = newProjectData.concat(KPIs.map(kpi => `${kpi.KPIId},${kpi.KPIName},${kpi.KPIProcent}`));
+            updatedData = updatedData.concat(newProjectData);
+        }
+
+        const finalData = updatedData.join('\n');
+        console.log('updatedData:', finalData); // Dodano logowanie zaktualizowanych danych
+
+        fs.writeFile(filePath, finalData, 'utf8', err => {
+            if (err) {
+                console.error('Błąd zapisu pliku:', err);
+                return res.status(500).send('Błąd serwera.');
+            }
+
+            res.send('Dane KPI zostały zaktualizowane pomyślnie.');
+        });
+    });
+});

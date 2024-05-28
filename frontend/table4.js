@@ -11,12 +11,18 @@ const rentownoscTable = document.getElementById('rentownoscTable');
 // Początkowe ukrycie elementów
 rentownoscTable.style.display = "none";
 employeeToProject.style.display="none";
+KpiForProject.style.display="none";
 button16.style.display = "none";
 button17.style.display = "none";
 button18.style.display = "none";
 button19.style.display = "none";
 button20.style.display = "none";
 addEmployeeToProjectFile.style.display="none";
+button21.style.display = "none";
+button22.style.display = "none";
+button23.style.display = "none";
+button24.style.display = "none";
+SaveAfterEdition.style.display= "none";
 
 document.getElementById("button10").addEventListener("click", function(event) {
     event.preventDefault(); // Prevent the form from submitting
@@ -616,7 +622,7 @@ function fillTableWithDataRentability(csvData) {
         });
     
         // Schowaj przyciski od button10 do button15
-        const buttonsToHide = ['button10', 'button11', 'button12', 'button13', 'button14', 'button15', 'addEmployeeToProject', 'button16','button17','button18','button19','button20'];
+        const buttonsToHide = ['button10', 'button11', 'button12', 'button13', 'button14', 'button15', 'addEmployeeToProject', 'addKpiToProject', 'button16','button17','button18','button19','button20'];
         buttonsToHide.forEach(buttonId => {
             const button = document.getElementById(buttonId);
             if (button) {
@@ -755,6 +761,319 @@ function fillTableWithDataRentability(csvData) {
         .then(result => {
             console.log(result);
             alert('Przypisanie pracowników zaktualizowane pomyślnie.');
+        })
+        .catch(error => {
+            console.error('Błąd:', error);
+            alert('Wystąpił problem podczas zapisywania danych.');
+        });
+    }
+
+    document.getElementById("addKpiToProject").addEventListener("click", function() {
+        document.getElementById("button21").style.display = "inline-block";
+        document.getElementById("button22").style.display = "inline-block"; 
+        document.getElementById("SaveAfterEdition").style.display = "inline-block"; 
+        document.getElementById("button23").style.display = "inline-block";  
+        document.getElementById("button24").style.display = "inline-block";  
+        // Schowaj wiersze tabeli poza zaznaczonym radiobuttonem
+        const radioButtons = document.querySelectorAll('#tableBody2 input[type="radio"]');
+        radioButtons.forEach(radioButton => {
+            const row = radioButton.closest('tr');
+            if (!radioButton.checked) {
+                row.style.display = 'none'; // Ukryj wiersz
+            }
+        });
+    
+        // Schowaj przyciski od button10 do button15
+        const buttonsToHide = ['button10', 'button11', 'button12', 'button13', 'button14', 'button15', 'addEmployeeToProject', 'addKpiToProject', 'button16','button17','button18','button19','button20'];
+        buttonsToHide.forEach(buttonId => {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                button.style.display = 'none'; // Ukryj przycisk
+            }
+        });
+    
+        // Ukryj formularz
+        document.getElementById("myForm2").style.display = "none";
+    
+        // Pokaż tabelę Kpi dla projektu
+        KpiForProject.style.display = "table";
+        loadDataKPIForProject(); // Wywołaj funkcję, aby zbudować tabelę
+    });
+    
+    function fillTableWithDataAboutKpiForProject(csvData) {
+        const tableBody = document.getElementById("tableBody6");
+        tableBody.innerHTML = ''; // Wyczyść zawartość tabeli przed wypełnieniem nowymi danymi
+        const rows = csvData.split('\n').filter(line => line.trim() !== '');
+        rows.forEach(row => {
+            const rowData = row.split(',');
+            const tableRow = document.createElement('tr');
+    
+            // Tworzenie komórki z radio buttonem
+            const radioCell = document.createElement('td');
+            const radioButton = document.createElement('input');
+            radioButton.type = 'radio';
+            radioButton.name = 'KPI';
+            radioCell.appendChild(radioButton);
+            tableRow.appendChild(radioCell);
+    
+            // Dodawanie pozostałych komórek z danymi
+            rowData.forEach(cellData => {
+                const tableCell = document.createElement('td');
+                tableCell.textContent = cellData;
+                tableRow.appendChild(tableCell);
+            });
+            
+            tableBody.appendChild(tableRow);
+        });
+    }
+    
+    function loadDataKPIForProject() {
+        const selectedProjectRadio = document.querySelector('input[name="projekt"]:checked');
+        if (!selectedProjectRadio) {
+            alert('Wybierz projekt.');
+            return;
+        }
+    
+        const projectRow = selectedProjectRadio.closest('tr');
+        const projectId = projectRow.cells[1].innerText;
+        const projectName = projectRow.cells[2].innerText;
+    
+        fetch(`/get-data-KPI-for-project?projectId=${projectId}&projectName=${projectName}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Wystąpił problem podczas pobierania danych.');
+            }
+            return response.text();
+        })
+        .then(csvData => {
+            fillTableWithDataAboutKpiForProject(csvData);
+        })
+        .catch(error => {
+            console.error('Błąd:', error);
+            alert('Wystąpił błąd podczas pobierania danych.');
+        });
+    }    
+    
+    
+    document.getElementById("button21").addEventListener("click", function() {
+        // Sprawdź, czy formularz już istnieje
+        if (!document.getElementById('dynamicForm2')) {
+            // Utwórz formularz dynamicznie
+            const form = document.createElement('form');
+            form.id = 'dynamicForm2';
+            form.innerHTML = `
+                <label for="input1">ID KPI:</label>
+                <input type="text" id="inputID_KPI"><br>
+                <label for="input2">Nazwa KPI:</label>
+                <input type="text" id="inputNameKPI"><br>
+                <label for="input3">Procent:</label>
+                <input type="text" id="inputKpiProcent"><br>
+                <button type="button" id="addDataKPI">Dodaj KPI</button>
+            `;
+            document.body.appendChild(form);
+    
+            // Dodaj zdarzenie kliknięcia dla przycisku dodawania danych
+            document.getElementById('addDataKPI').addEventListener('click', function() {
+                // Pobierz wartości z formularza
+                const input1Value = document.getElementById('inputID_KPI').value.toUpperCase();
+                const input2Value = document.getElementById('inputNameKPI').value.toUpperCase();
+                const input3Value = document.getElementById('inputKpiProcent').value.toUpperCase();
+    
+                // Sprawdź, czy wszystkie pola są wypełnione
+                if (input1Value === '' || input2Value === '' || input3Value === '') {
+                    alert("Proszę wypełnić wszystkie pola formularza.");
+                    return;
+                }
+    
+                // Dodaj nowy wiersz do tabeli
+                const rentownoscTableBody = document.getElementById('tableBody6');
+                rentownoscTableBody.innerHTML += `<tr>
+                    <td><input type="radio" name="KPI"></td>
+                    <td>${input1Value}</td>
+                    <td>${input2Value}</td>
+                    <td>${input3Value}</td>
+                </tr>`;
+    
+                // Usuń formularz po dodaniu danych
+                form.remove();
+            });
+        }
+    });
+
+    document.getElementById("button22").addEventListener("click", function(event) {
+        event.preventDefault(); // Prevent the default form submission
+        
+        // Pobierz wszystkie radio buttons
+        var radioButtons = document.querySelectorAll('input[type="radio"][name="KPI"]');
+        
+        var selectedRow = null;
+        
+        // Sprawdź, który wiersz jest zaznaczony
+        for (var i = 0; i < radioButtons.length; i++) {
+            if (radioButtons[i].checked) {
+                selectedRow = radioButtons[i].parentNode.parentNode; // Pobierz rodzica rodzica, czyli <tr>
+                break;
+            }
+        }
+        
+        if (selectedRow) {
+            // Pobierz wszystkie komórki w wybranym wierszu
+            var cells = selectedRow.getElementsByTagName("td");
+            
+            // Zamień zawartość każdej komórki (z wyjątkiem pierwszej) na pole tekstowe
+            for (var i = 1; i < cells.length; i++) {
+                if (cells[i].querySelector("input[type='radio']")) {
+                    continue; // Ignoruj kolumnę z przyciskiem typu radio
+                }
+                
+                // Utwórz pole tekstowe
+                var input = document.createElement("input");
+                input.type = "text";
+                input.value = cells[i].textContent; // Przypisz aktualną zawartość komórki jako wartość pola tekstowego
+                cells[i].textContent = ''; // Wyczyść zawartość komórki
+                cells[i].appendChild(input); // Dodaj pole tekstowe do komórki
+            }
+        } else {
+            alert("Proszę wybrać KPI do edycji.");
+        }
+    });
+
+    document.getElementById("SaveAfterEdition").addEventListener("click", function(event) {
+        event.preventDefault(); // Prevent the default form submission
+        
+        // Pobierz wszystkie radio buttons
+        var radioButtons = document.querySelectorAll('input[type="radio"][name="KPI"]');
+        
+        var selectedRow = null;
+        
+        // Sprawdź, który wiersz jest zaznaczony
+        for (var i = 0; i < radioButtons.length; i++) {
+            if (radioButtons[i].checked) {
+                selectedRow = radioButtons[i].parentNode.parentNode; // Pobierz rodzica rodzica, czyli <tr>
+                break;
+            }
+        }
+        
+        if (selectedRow) {
+            // Pobierz wszystkie komórki w wybranym wierszu
+            var cells = selectedRow.getElementsByTagName("td");
+            
+            // Iteruj przez wszystkie komórki i zamień pola tekstowe na zwykły tekst
+            for (var i = 0; i < cells.length; i++) {
+                var input = cells[i].querySelector("input[type='text']");
+                if (input) {
+                    var textNode = document.createTextNode(input.value);
+                    cells[i].textContent = ''; // Wyczyść zawartość komórki
+                    cells[i].appendChild(textNode); // Dodaj tekst do komórki
+                }
+            }
+        } else {
+            alert("Proszę wybrać KPI do zapisu po edycji.");
+        }
+    });
+
+    document.getElementById("button23").addEventListener("click", function(event) {
+        event.preventDefault(); // Prevent the default form submission
+        
+        // Pobierz wszystkie radio buttons
+        var radioButtons = document.querySelectorAll('input[type="radio"][name="KPI"]');
+        
+        var selectedRow = null;
+        
+        // Sprawdź, który wiersz jest zaznaczony
+        for (var i = 0; i < radioButtons.length; i++) {
+            if (radioButtons[i].checked) {
+                selectedRow = radioButtons[i].parentNode.parentNode; // Pobierz rodzica rodzica, czyli <tr>
+                break;
+            }
+        }
+        
+        if (selectedRow) {
+            selectedRow.remove(); // Usuń zaznaczony wiersz
+        } else {
+            alert("Proszę wybrać KPI do usunięcia.");
+        }
+    });
+
+    document.getElementById("button24").addEventListener("click", function(event) {
+        event.preventDefault(); // Zapobiegaj domyślnej akcji formularza
+    
+        // Pobierz wszystkie radio buttons
+        var radioButtons = document.querySelectorAll('input[type="radio"][name="KPI"]');
+        
+        radioButtons.forEach(radioButton => {
+            // Zamień radio na checkbox
+            var checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'KPI';
+            checkbox.checked = radioButton.checked; // Zachowaj stan zaznaczenia
+            radioButton.parentNode.replaceChild(checkbox, radioButton);
+        });
+        
+        alert('Proszę zaznaczyć dane do wysyłki.');
+    
+        // Wywołaj funkcję sendSelectedKPIData
+        sendSelectedKPIData();
+    });
+    
+    function sendSelectedKPIData() {
+        // Pobierz zaznaczony projekt z tableBody2
+        const selectedProjectRadio = document.querySelector('input[name="projekt"]:checked');
+        if (!selectedProjectRadio) {
+            alert('Wybierz projekt.');
+            return;
+        }
+        
+        const projectRow = selectedProjectRadio.closest('tr');
+        const projectId = projectRow.cells[1].innerText; 
+        const projectName = projectRow.cells[2].innerText; 
+    
+        // Zbierz wszystkie zaznaczone checkboxy z tabeli tableBody6
+        const selectedCheckboxes = document.querySelectorAll('#tableBody6 input[type="checkbox"]:checked');
+    
+        if (selectedCheckboxes.length === 0) {
+            alert('Proszę zaznaczyć dane do wysyłki.');
+            return;
+        }
+    
+        // Przygotuj dane KPI do wysłania
+        const selectedKPIData = Array.from(selectedCheckboxes).map(checkbox => {
+            const KPIRow = checkbox.closest('tr');
+            const KPIId = KPIRow.cells[1].innerText;
+            const KPIName = KPIRow.cells[2].innerText;
+            const KPIProcent = KPIRow.cells[3].innerText;
+            
+            return {
+                KPIId,
+                KPIName,
+                KPIProcent
+            };
+        });
+    
+        // Przygotuj dane do wysłania, włączając informacje o projekcie
+        const dataToSend = {
+            projectId,
+            projectName,
+            KPIs: selectedKPIData
+        };
+    
+        // Wysyłka danych do serwera
+        fetch('/update-kpi-assignments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataToSend)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Wystąpił problem podczas zapisywania danych.');
+            }
+            return response.text();
+        })
+        .then(result => {
+            console.log(result);
+            alert('Przypisanie KPI zaktualizowane pomyślnie.');
         })
         .catch(error => {
             console.error('Błąd:', error);
