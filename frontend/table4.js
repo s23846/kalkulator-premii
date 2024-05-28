@@ -626,14 +626,24 @@ function fillTableWithDataRentability(csvData) {
     
         // Ukryj formularz
         document.getElementById("myForm2").style.display = "none";
-
-            // Pokaż tabelę pracowników do proejktu
-            employeeToProject.style.display = "table";
-            loadDataEmployeeFromCSVToProject();
+    
+        // Pokaż tabelę pracowników do projektu
+        employeeToProject.style.display = "table";
+        loadUnassignedEmployees();
     });
     
-    function loadDataEmployeeFromCSVToProject() {
-        fetch('/get-data-employee-from-repository-to-project')
+    function loadUnassignedEmployees() {
+        const selectedProjectRadio = document.querySelector('input[name="projekt"]:checked');
+        if (!selectedProjectRadio) {
+            alert('Wybierz projekt.');
+            return;
+        }
+    
+        const projectRow = selectedProjectRadio.closest('tr');
+        const projectId = projectRow.cells[1].innerText;
+        const projectName = projectRow.cells[2].innerText;
+    
+        fetch(`/get-data-employee-from-repository-to-project?projectId=${projectId}&projectName=${projectName}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Wystąpił problem podczas pobierania danych.');

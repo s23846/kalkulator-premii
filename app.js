@@ -243,15 +243,54 @@ app.get('/get-data-project-profitability-from-repository', (req, res) => {
 });
 
 app.get('/get-data-employee-from-repository-to-project', (req, res) => {
-    fs.readFile('frontend/Listapracowników.csv', 'utf8', (err, data) => {
+    const { projectId, projectName } = req.query;
+
+    if (!projectId || !projectName) {
+        return res.status(400).send('Brakujące dane: ID projektu lub nazwa projektu.');
+    }
+
+    fs.readFile('frontend/Listapracowników.csv', 'utf8', (err, allEmployeesData) => {
         if (err) {
-            console.error('Błąd podczas odczytu pliku:', err);
-            res.status(500).send('Wystąpił błąd podczas odczytu danych.');
-            return;
+            console.error('Błąd podczas odczytu pliku pracowników:', err);
+            return res.status(500).send('Błąd serwera.');
         }
-        res.send(data);
+
+        fs.readFile('frontend/listaPraconikówPerProjekt.csv', 'utf8', (err, projectAssignmentsData) => {
+            if (err) {
+                console.error('Błąd podczas odczytu pliku przypisania pracowników:', err);
+                return res.status(500).send('Błąd serwera.');
+            }
+
+            const allEmployees = allEmployeesData.split('\n').filter(line => line.trim() !== '');
+            const projectAssignments = projectAssignmentsData.split('\n').map(line => line.trim()).filter(line => line !== '');
+
+            let assignedEmployeeIds = [];
+
+            let i = 0;
+            while (i < projectAssignments.length) {
+                const line = projectAssignments[i];
+                if (line.startsWith(`Id projektu to: ${projectId}, Nazwa projektu to: ${projectName}`)) {
+                    i++;
+                    while (i < projectAssignments.length && !projectAssignments[i].startsWith('Id projektu to: ')) {
+                        const employeeId = projectAssignments[i].split(',')[0];
+                        assignedEmployeeIds.push(employeeId);
+                        i++;
+                    }
+                } else {
+                    i++;
+                }
+            }
+
+            const unassignedEmployees = allEmployees.filter(employee => {
+                const employeeId = employee.split(',')[1]; // ID pracownika jest na drugim miejscu
+                return !assignedEmployeeIds.includes(employeeId);
+            });
+
+            res.send(unassignedEmployees.join('\n'));
+        });
     });
 });
+
 
 app.post('/update-employee-assignments', (req, res) => {
     console.log(req.body);
