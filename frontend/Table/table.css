@@ -36,7 +36,7 @@ tbody td {
     color: black;
 }
 
-#button1, #button2, #button3, #button4, #button5, #button6, #button7, #applyFilters, #button8, #button9, #button10, #button11, #button12, #button13, #button14, #button15, #button16, #button17, #button18, #button19, #button20, #addEmployeeToProject, #addEmployeeToProjectFile, #addKpiToProject, #button21, #button22, #button23, #button24, #SaveAfterEdition{
+#button1, #button2, #button3, #button4, #button5, #button6, #button7, #applyFilters, #button8, #button9, #button10, #button11, #button12, #button13, #button14, #button15, #button16, #button17, #button18, #button19, #button20, #addEmployeeToProject, #addEmployeeToProjectFile, #addKpiToProject, #button21, #button22, #button23, #button24, #SaveAfterEdition, #button25, #button26{
     background-color: #A5A6BD; /* Zielony kolor tła */
     color: black; /* Biały kolor tekstu */
     padding: 10px 20px; /* Wielkość wypełnienia */
@@ -49,7 +49,7 @@ tbody td {
     margin-right: 15px;
 }
 
-#button1:hover, #button2:hover, #button3:hover, #button4:hover ,#button5:hover, #button6:hover, #button7:hover, #applyFilters:hover, #button8:hover, #button9:hover, #button10:hover, #button11:hover, #button12:hover, #button13:hover, #button14:hover, #button15:hover, #button16:hover, #button17:hover, #button18:hover, #button19:hover, #button20:hover, #addEmployeeToProject:hover, #addEmployeeToProjectFile:hover, #addKpiToProject:hover, #button21:hover, #button22:hover, #button23:hover, #button24:hover, #SaveAfterEdition:hover{
+#button1:hover, #button2:hover, #button3:hover, #button4:hover ,#button5:hover, #button6:hover, #button7:hover, #applyFilters:hover, #button8:hover, #button9:hover, #button10:hover, #button11:hover, #button12:hover, #button13:hover, #button14:hover, #button15:hover, #button16:hover, #button17:hover, #button18:hover, #button19:hover, #button20:hover, #addEmployeeToProject:hover, #addEmployeeToProjectFile:hover, #addKpiToProject:hover, #button21:hover, #button22:hover, #button23:hover, #button24:hover, #SaveAfterEdition:hover, #button25:hover, #button26:hover, #button26:hover{
     background-color: rgba(199, 210, 240, 0.50); /* Ciemniejszy zielony kolor tła po najechaniu myszką */
     font-weight: bold;
 }
@@ -199,3 +199,16 @@ tfoot td {
     color: black; /* Kolor tekstu */
 }
 
+#button25 {
+    margin-top: 20px; /* Dodaj margines na górze */
+    margin-bottom: 20px; /* Dodaj margines na dole */
+}
+
+#typCzasuRozliczenia {
+    width: 20%; /* Tutaj ustawiasz szerokość, np. 80% */
+    margin-left: 0;
+}
+
+#premiaPodsumowanie {
+    margin-top: 100px; /* Dodaj margines na górze */
+}

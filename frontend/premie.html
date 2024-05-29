@@ -11,6 +11,7 @@
 
     <!--Nagłówek interaktywny-->
     <div id="header-container"></div>
+    <div id="labels-container"></div>
     <table id="projektyDoPremii" border="1">
         <thead>
             <tr>
@@ -22,8 +23,39 @@
         <tbody id="tableBodyProjektyWPremii">
         </tbody>
     </table>
-    <div id="labels-container"></div>
-    <script src="Table3/table3.js"></script>
+    <table id="typCzasuRozliczenia" border="1">
+        <thead>
+            <tr>
+                <th>Wybierz</th>
+                <th>Typ rozliczenia</th>
+            </tr>
+        </thead>
+        <tbody id="typRozliczeniaPremii">
+            <tr>
+                <td><input type="radio" name="typRozliczenia" value="Miesięczne"></td>
+                <td>Miesięczne</td>
+            </tr>
+            <tr>
+                <td><input type="radio" name="typRozliczenia" value="Kwartalne"></td>
+                <td>Kwartalne</td>
+            </tr>
+            <tr>
+                <td><input type="radio" name="typRozliczenia" value="Roczne"></td>
+                <td>Roczne</td>
+            </tr>
+        </tbody>
+    </table>
+    <table id="premiaPodsumowanie" border="1">
+        <thead>
+            <tr id="tableHeader">
+            </tr>
+        </thead>
+        <tbody id="premiaPodsumowanieCialo">
+        </tbody>
+    </table>
+    <button id="button25">Wybierz projekt</button>
+    <button id="button26">Wybierz typ rozliczenia</button>
+  <script src="Table3/table3.js"></script>
     <script src="frontend/table5.js"></script>
 </body>
 </html>

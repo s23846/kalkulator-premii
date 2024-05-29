@@ -492,3 +492,14 @@ app.post('/update-kpi-assignments', (req, res) => {
         });
     });
 });
+
+app.get('/get-pracownikow-per-projekt', (req, res) => {
+    fs.readFile('frontend/listaPraconikówPerProjekt.csv', 'utf8', (err, data) => {
+        if (err) {
+            console.error('Błąd podczas odczytu pliku:', err);
+            res.status(500).send('Wystąpił błąd podczas odczytu danych.');
+            return;
+        }
+        res.send(data);
+    });
+});
