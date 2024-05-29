@@ -250,7 +250,7 @@ function fillTableWithDataProject(csvData) {
         });
     
         // Schowaj przyciski od button10 do button15
-        const buttonsToHide = ['button10', 'button11', 'button12', 'button13', 'button14', 'button15'];
+        const buttonsToHide = ['button10', 'button11', 'button12', 'button13', 'button14', 'button15', 'addEmployeeToProject', 'addKpiToProject'];
         buttonsToHide.forEach(buttonId => {
             const button = document.getElementById(buttonId);
             if (button) {
