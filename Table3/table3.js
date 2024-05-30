@@ -284,3 +284,54 @@ function checkIfProjectExistsInKPI(kpiData, projectId, projectName) {
     }
     return false;
 }
+
+document.getElementById("button26").addEventListener("click", function() {
+    saveTableToCSV();
+});
+
+function saveTableToCSV() {
+    const labels = document.querySelectorAll('#labels-container label');
+    const projectLabels = document.querySelectorAll('#labels-container-project label');
+    const employeeId = labels[0].textContent.replace('ID: ', '').trim();
+    const employeeName = labels[1].textContent.replace('Imię: ', '').trim();
+    const employeeSurname = labels[2].textContent.replace('Nazwisko: ', '').trim();
+    const projectId = projectLabels[0].textContent.replace('ID Projektu: ', '').trim();
+    const projectName = projectLabels[1].textContent.replace('Nazwa Projektu: ', '').trim();
+
+    const tableBody = document.getElementById("premiaPodsumowanieCialo");
+    const rows = tableBody.getElementsByTagName('tr');
+
+    let dataToSend = {
+        employeeId: employeeId,
+        employeeName: employeeName,
+        employeeSurname: employeeSurname,
+        projectId: projectId,
+        projectName: projectName,
+        tableData: []
+    };
+
+    for (let row of rows) {
+        const cells = row.getElementsByTagName('td');
+        let rowData = [];
+        for (let cell of cells) {
+            rowData.push(cell.innerText.replace('zł', '').trim() || 'null');
+        }
+        dataToSend.tableData.push(rowData);
+    }
+
+    fetch('/save-premia-data', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dataToSend)
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);  // Informacja zwrotna dla użytkownika
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        alert('Wystąpił błąd podczas zapisywania danych.');  // Informacja o błędzie
+    });
+}

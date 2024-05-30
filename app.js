@@ -503,3 +503,42 @@ app.get('/get-pracownikow-per-projekt', (req, res) => {
         res.send(data);
     });
 });
+
+app.post('/save-premia-data', (req, res) => {
+    const data = req.body;
+    const csvFilePath = path.join(__dirname, 'frontend/premiaPraconiwkaPerProjekt.csv');
+
+    fs.readFile(csvFilePath, 'utf8', (err, fileData) => {
+        if (err) {
+            console.error('Error reading CSV file:', err);
+            return res.status(500).json({ message: 'Error reading CSV file' });
+        }
+
+        let existingData = fileData.split('\n').filter(row => row.length > 1);
+
+        let employeeHeader = `Dane pracownika: ID: ${data.employeeId}, Imię: ${data.employeeName}, Nazwisko: ${data.employeeSurname}, Dane projektu: ID: ${data.projectId}, Nazwa projektu: ${data.projectName}`;
+        
+        let employeeIndex = existingData.findIndex(row => row.startsWith(`Dane pracownika: ID: ${data.employeeId}`) && row.includes(`Dane projektu: ID: ${data.projectId}`));
+
+        let newEmployeeData = data.tableData.map(row => row.join(',')).join('\n');
+
+        if (employeeIndex !== -1) {
+            // Jeśli istnieje, aktualizuj dane
+            existingData[employeeIndex] = `${employeeHeader}\n${newEmployeeData}`;
+        } else {
+            // Jeśli nie istnieje, dodaj nowe dane
+            existingData.push(`${employeeHeader}\n${newEmployeeData}`);
+        }
+
+        let csvContent = existingData.join('\n\n');
+
+        fs.writeFile(csvFilePath, csvContent, 'utf8', (err) => {
+            if (err) {
+                console.error('Error writing CSV file:', err);
+                return res.status(500).json({ message: 'Error writing CSV file' });
+            }
+
+            res.json({ message: 'Data saved successfully' });
+        });
+    });
+});
