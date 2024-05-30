@@ -165,7 +165,7 @@ function showMonthlyBonusTable(kpiData) {
     const projectExists = checkIfProjectExistsInKPI(kpiData, projectId, projectName);
     if (!projectExists) {
         alert('Wybrany projekt nie istnieje w KPI.');
-        document.getElementById("button26").style.display="none";
+        document.getElementById("button26").style.display = "none";
         return;
     }
     const tableHeader = document.getElementById("tableHeader");
@@ -177,17 +177,21 @@ function showMonthlyBonusTable(kpiData) {
     let kpis = [];
     kpiRows.forEach((row, index) => {
         const [kpiId, kpiName, kpiWeight, , , kpiBonus] = row.split(',');
-        kpis.push({ id: kpiId, name: kpiName, weight: kpiWeight, bonus: kpiBonus });
-        tableHeader.innerHTML += `<th>KPI: ${kpiName}</th><th>Udział w KPI ${index + 1}</th>`;
+        kpis.push({ id: kpiId, name: kpiName, weight: parseFloat(kpiWeight), bonus: kpiBonus });
+        tableHeader.innerHTML += `<th>KPI: ${kpiName}</th><th>Udział w KPI ${index + 1}</th><th>Premia za KPI ${index + 1}</th>`;
     });
+
+    // Dodaj nagłówek dla kolumny "Suma Premii"
+    tableHeader.innerHTML += "<th>Suma Premii</th>";
 
     const months = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
     months.forEach(month => {
         const row = tableBody.insertRow();
         let rowHTML = `<td>${month}</td><td contenteditable="true"></td><td></td>`;
         kpis.forEach(kpi => {
-            rowHTML += `<td>${kpi.weight}%</td><td contenteditable="true"></td>`;
+            rowHTML += `<td>${kpi.weight}%</td><td contenteditable="true"></td><td></td>`;
         });
+        rowHTML += "<td></td>"; // Dodaj komórkę dla "Suma Premii"
         row.innerHTML = rowHTML;
     });
 
@@ -197,34 +201,58 @@ function showMonthlyBonusTable(kpiData) {
         .then(csvData => {
             const rentownościRows = csvData.split('\n').map(row => row.split(','));
             const rentownościData = rentownościRows.map(row => ({
+                projectId: row[0],
                 lowerBound: parseFloat(row[2]),
                 upperBound: parseFloat(row[3]),
                 percent: parseFloat(row[4]),
                 maxBonus: parseFloat(row[5])
             }));
 
-            // Add an event listener to the table body to calculate the MAX wartość premii
+            // Add an event listener to the table body to calculate the MAX wartość premii, Premia za KPI, and Suma Premii
             tableBody.addEventListener('input', function(event) {
                 const row = event.target.parentElement;
                 const projectValueCell = row.cells[1]; // Assuming 2nd cell is "Wartość projektu"
                 const maxBonusCell = row.cells[2]; // Assuming 3rd cell is "MAX wartość premii"
 
                 if (projectValueCell && maxBonusCell) {
-                    const projectValue = parseFloat(projectValueCell.innerText);
+                    let projectValue = parseFloat(projectValueCell.innerText.replace('zł', '').trim());
 
                     if (!isNaN(projectValue)) {
-                        const rentowność = rentownościData.find(r => projectValue >= r.lowerBound && projectValue <= r.upperBound);
+                        const rentowność = rentownościData.find(r => r.projectId === projectId && projectValue >= r.lowerBound && projectValue <= r.upperBound);
 
                         if (rentowność) {
+                            let maxBonus;
                             if (projectValue === rentowność.upperBound) {
-                                maxBonusCell.innerText = rentowność.maxBonus;
+                                maxBonus = rentowność.maxBonus;
                             } else {
-                                const maxBonus = (projectValue * rentowność.percent / 100).toFixed(2);
-                                maxBonusCell.innerText = maxBonus;
+                                maxBonus = (projectValue * rentowność.percent / 100).toFixed(2);
                             }
+                            maxBonusCell.innerText = `${maxBonus} zł`;
                         } else {
                             maxBonusCell.innerText = '';
                         }
+
+                        // Calculate Premia za KPI and Suma Premii
+                        let sumaPremii = 0;
+                        kpis.forEach((kpi, index) => {
+                            const participationCell = row.cells[4 + 3 * index]; // Adjusted index for participation
+                            const bonusCell = row.cells[5 + 3 * index]; // Adjusted index for bonus
+
+                            if (participationCell && bonusCell) {
+                                let participation = parseFloat(participationCell.innerText.replace('%', '').trim());
+                                if (!isNaN(participation)) {
+                                    const premiaZaKPI = (projectValue * kpi.weight / 100 * participation / 100 * rentowność.percent / 100).toFixed(2);
+                                    bonusCell.innerText = `${premiaZaKPI} zł`;
+                                    sumaPremii += parseFloat(premiaZaKPI);
+                                } else {
+                                    bonusCell.innerText = '';
+                                }
+                            }
+                        });
+
+                        // Update Suma Premii cell
+                        const sumaPremiiCell = row.cells[row.cells.length - 1]; // Assuming last cell is "Suma Premii"
+                        sumaPremiiCell.innerText = `${sumaPremii.toFixed(2)} zł`;
                     }
                 }
             });
