@@ -514,23 +514,33 @@ app.post('/save-premia-data', (req, res) => {
             return res.status(500).json({ message: 'Error reading CSV file' });
         }
 
-        let existingData = fileData.split('\n').filter(row => row.length > 1);
+        let existingData = fileData.split('\n\n').filter(row => row.trim().length > 0);
+        const employeeHeader = `Dane pracownika: ID: ${data.employeeId}, Imię: ${data.employeeName}, Nazwisko: ${data.employeeSurname}, Dane projektu: ID: ${data.projectId}, Nazwa projektu: ${data.projectName}`;
 
-        let employeeHeader = `Dane pracownika: ID: ${data.employeeId}, Imię: ${data.employeeName}, Nazwisko: ${data.employeeSurname}, Dane projektu: ID: ${data.projectId}, Nazwa projektu: ${data.projectName}`;
-        
-        let employeeIndex = existingData.findIndex(row => row.startsWith(`Dane pracownika: ID: ${data.employeeId}`) && row.includes(`Dane projektu: ID: ${data.projectId}`));
+        // Znaleźć istniejący wpis pracownika i projektu
+        let employeeIndex = existingData.findIndex(row => row.startsWith(employeeHeader));
 
-        let newEmployeeData = data.tableData.map(row => row.join(',')).join('\n');
+        // Nowe dane pracownika do zapisania
+        const newEmployeeData = data.tableData.map(row => row.join(',')).join('\n');
 
         if (employeeIndex !== -1) {
-            // Jeśli istnieje, aktualizuj dane
-            existingData[employeeIndex] = `${employeeHeader}\n${newEmployeeData}`;
+            // Aktualizacja istniejących danych, rozdzielić nagłówek i dane
+            let existingEntry = existingData[employeeIndex].split('\n');
+            let existingHeader = existingEntry.shift();
+            let existingRows = existingEntry;
+
+            // Zastępujemy tylko zmienione miesiące
+            const updatedRows = data.tableData.map((newRow, index) => {
+                return newRow.join(',');
+            });
+
+            existingData[employeeIndex] = `${employeeHeader}\n${updatedRows.join('\n')}`;
         } else {
-            // Jeśli nie istnieje, dodaj nowe dane
+            // Dodaj nowe dane pracownika
             existingData.push(`${employeeHeader}\n${newEmployeeData}`);
         }
 
-        let csvContent = existingData.join('\n\n');
+        const csvContent = existingData.join('\n\n');
 
         fs.writeFile(csvFilePath, csvContent, 'utf8', (err) => {
             if (err) {

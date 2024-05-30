@@ -100,6 +100,13 @@ function attachInputEventListener() {
 
                     if (participationCell && bonusCell) {
                         let participation = parseFloat(participationCell.innerText.replace('%', '').trim());
+
+                        // Walidacja udziału w KPI
+                        if (participation > 100) {
+                            participationCell.innerText = '100';
+                            participation = 100;
+                        }
+
                         if (!isNaN(participation)) {
                             const premiaZaKPI = (projectValue * kpi.weight / 100 * participation / 100 * rentownosc.percent / 100).toFixed(2);
                             bonusCell.innerText = `${premiaZaKPI} zł`;
@@ -273,23 +280,22 @@ function showMonthlyBonusTable(kpiData) {
     const { projectId, projectName } = projectInfo;
 
     // Sprawdź, czy projekt istnieje w KPI
-    const projectExists = checkIfProjectExistsInKPI(kpiData, projectId, projectName);
-    if (!projectExists) {
-        alert('Wybrany projekt nie posiada przypisanychKPI.');
+    const projectKPI = parseKPIForProject(kpiData, projectId, projectName);
+    if (projectKPI.length === 0) {
+        alert('Wybrany projekt nie posiada przypisanych KPI.');
         document.getElementById("button26").style.display = "none";
         return;
     }
+
     const tableHeader = document.getElementById("tableHeader");
     const tableBody = document.getElementById("premiaPodsumowanieCialo");
 
     tableHeader.innerHTML = "<th>Miesiąc</th><th>Wartość projektu</th><th>MAX premii</th>";
 
-    const kpiRows = kpiData.split('\n').slice(1); // pomijając pierwszą linię z nagłówkiem projektu
     let kpis = [];
-    kpiRows.forEach((row, index) => {
-        const [kpiId, kpiName, kpiWeight, , , kpiBonus] = row.split(',');
-        kpis.push({ id: kpiId, name: kpiName, weight: parseFloat(kpiWeight), bonus: kpiBonus });
-        tableHeader.innerHTML += `<th>KPI: ${kpiName}</th><th>Udział w KPI ${index + 1}</th><th>Premia za KPI ${index + 1}</th>`;
+    projectKPI.forEach((kpi, index) => {
+        kpis.push({ id: kpi[0], name: kpi[1], weight: parseFloat(kpi[2]), bonus: kpi[5] });
+        tableHeader.innerHTML += `<th>KPI: ${kpi[1]}</th><th>Udział w KPI ${index + 1}</th><th>Premia za KPI ${index + 1}</th>`;
     });
 
     // Dodaj nagłówek dla kolumny "Suma Premii"
@@ -351,6 +357,13 @@ function showMonthlyBonusTable(kpiData) {
 
                             if (participationCell && bonusCell) {
                                 let participation = parseFloat(participationCell.innerText.replace('%', '').trim());
+
+                                // Walidacja udziału w KPI
+                                if (participation > 100) {
+                                    participationCell.innerText = '100%';
+                                    participation = 100;
+                                }
+
                                 if (!isNaN(participation)) {
                                     const premiaZaKPI = (projectValue * kpi.weight / 100 * participation / 100 * rentowność.percent / 100).toFixed(2);
                                     bonusCell.innerText = `${premiaZaKPI} zł`;
@@ -385,15 +398,30 @@ function getProjectInfoFromLabels() {
     return { projectId, projectName };
 }
 
-function checkIfProjectExistsInKPI(kpiData, projectId, projectName) {
+function parseKPIForProject(kpiData, projectId, projectName) {
     const kpiRows = kpiData.split('\n');
-    for (let row of kpiRows) {
-        const match = row.match(/^Id projektu to: (\d+), Nazwa projektu to: (.+):$/);
-        if (match && match[1] === projectId && match[2].toUpperCase() === projectName.toUpperCase()) {
-            return true;
+    let projectKPI = [];
+    let currentProjectId = null;
+
+    kpiRows.forEach(row => {
+        row = row.trim();
+        if (row === '') {
+            return;
         }
-    }
-    return false;
+        
+        const projectHeaderMatch = row.match(/^Id projektu to: (\d+), Nazwa projektu to: (.+):$/);
+        if (projectHeaderMatch) {
+            currentProjectId = projectHeaderMatch[1];
+            return;
+        }
+
+        if (currentProjectId === projectId) {
+            const rowData = row.split(',');
+            projectKPI.push(rowData);
+        }
+    });
+
+    return projectKPI;
 }
 
 document.getElementById("button26").addEventListener("click", function() {
