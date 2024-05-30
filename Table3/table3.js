@@ -1,10 +1,9 @@
 //OBSŁUGA TABEL PREMII
-typCzasuRozliczenia.style.display="none";
 premiaPodsumowanie.style.display="none";
 button26.style.display="none";
 
 document.addEventListener("DOMContentLoaded", function() {
-    fillLabelsFromLocalStorage();
+    fillLabelsFromLocalStorage()
     loadDataForBonusTable();
 });
 
@@ -121,16 +120,54 @@ function fillTableWithBonusData(csvData, assignedProjects, kpiData) {
 
     document.getElementById("button25").addEventListener("click", function(event) {
         event.preventDefault();
+        assignProjectToContainer();
         projektyDoPremii.style.display="none";
         document.getElementById("button25").style.display = "none";  
-        typCzasuRozliczenia.style.display="table";
         document.getElementById("button26").style.display = "inline-block";  
-
         showMonthlyBonusTable(kpiData);
     });
 }
 
+function assignProjectToContainer() {
+    const selectedRadio = document.querySelector('input[name="projekt"]:checked');
+    if (selectedRadio) {
+        const row = selectedRadio.closest('tr'); // Znajduje wiersz, który zawiera zaznaczony radio button
+        const cells = row.getElementsByTagName('td'); // Pobiera wszystkie komórki wiersza
+
+        const projectId = cells[1].textContent; // Pobiera ID projektu z drugiej komórki
+        const projectName = cells[2].textContent; // Pobiera nazwę projektu z trzeciej komórki
+
+        const labelsContainerProject = document.getElementById('labels-container-project');
+        labelsContainerProject.innerHTML = '';
+
+        const projectIdLabel = document.createElement('label');
+        projectIdLabel.textContent = 'ID Projektu: ' + projectId;
+        labelsContainerProject.appendChild(projectIdLabel);
+
+        const projectNameLabel = document.createElement('label');
+        projectNameLabel.textContent = 'Nazwa Projektu: ' + projectName;
+        labelsContainerProject.appendChild(projectNameLabel);
+    } else {
+        alert('Proszę wybrać projekt.');
+    }
+}
+
 function showMonthlyBonusTable(kpiData) {
+    const projectInfo = getProjectInfoFromLabels();
+    if (!projectInfo) {
+        alert('Błąd: nie można znaleźć informacji o projekcie.');
+        return;
+    }
+
+    const { projectId, projectName } = projectInfo;
+
+    // Sprawdź, czy projekt istnieje w KPI
+    const projectExists = checkIfProjectExistsInKPI(kpiData, projectId, projectName);
+    if (!projectExists) {
+        alert('Wybrany projekt nie istnieje w KPI.');
+        document.getElementById("button26").style.display="none";
+        return;
+    }
     const tableHeader = document.getElementById("tableHeader");
     const tableBody = document.getElementById("premiaPodsumowanieCialo");
 
@@ -195,7 +232,27 @@ function showMonthlyBonusTable(kpiData) {
         .catch(error => console.error('Error loading rentowności data:', error));
 
     // Ukrywanie lub wyświetlanie elementów na dole strony
-    document.getElementById("typCzasuRozliczenia").style.display = "none";
     document.getElementById("premiaPodsumowanie").style.display = "table";
     document.getElementById("button26").style.display = "inline-block"; 
+}
+
+function getProjectInfoFromLabels() {
+    const labelsContainerProject = document.getElementById('labels-container-project');
+    const labels = labelsContainerProject.querySelectorAll('label');
+    if (labels.length < 2) return null;
+
+    const projectId = labels[0].textContent.replace('ID Projektu: ', '').trim();
+    const projectName = labels[1].textContent.replace('Nazwa Projektu: ', '').trim();
+    return { projectId, projectName };
+}
+
+function checkIfProjectExistsInKPI(kpiData, projectId, projectName) {
+    const kpiRows = kpiData.split('\n');
+    for (let row of kpiRows) {
+        const match = row.match(/^Id projektu to: (\d+), Nazwa projektu to: (.+):$/);
+        if (match && match[1] === projectId && match[2].toUpperCase() === projectName.toUpperCase()) {
+            return true;
+        }
+    }
+    return false;
 }

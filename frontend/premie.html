@@ -11,7 +11,14 @@
 
     <!--Nagłówek interaktywny-->
     <div id="header-container"></div>
-    <div id="labels-container"></div>
+    <div id="container-wrapper">
+        <div id="labels-container">
+            <!-- Zawartość pierwszego kontenera -->
+        </div>
+        <div id="labels-container-project">
+            <!-- Zawartość drugiego kontenera -->
+        </div>
+    </div>    
     <table id="projektyDoPremii" border="1">
         <thead>
             <tr>
@@ -23,28 +30,6 @@
         <tbody id="tableBodyProjektyWPremii">
         </tbody>
     </table>
-    <table id="typCzasuRozliczenia" border="1">
-        <thead>
-            <tr>
-                <th>Wybierz</th>
-                <th>Typ rozliczenia</th>
-            </tr>
-        </thead>
-        <tbody id="typRozliczeniaPremii">
-            <tr>
-                <td><input type="radio" name="typRozliczenia" value="Miesięczne"></td>
-                <td>Miesięczne</td>
-            </tr>
-            <tr>
-                <td><input type="radio" name="typRozliczenia" value="Kwartalne"></td>
-                <td>Kwartalne</td>
-            </tr>
-            <tr>
-                <td><input type="radio" name="typRozliczenia" value="Roczne"></td>
-                <td>Roczne</td>
-            </tr>
-        </tbody>
-    </table>
     <table id="premiaPodsumowanie" border="1">
         <thead>
             <tr id="tableHeader">
@@ -54,7 +39,7 @@
         </tbody>
     </table>
     <button id="button25">Wybierz projekt</button>
-    <button id="button26">Zapisz tabele premii na serwezre</button>
+    <button id="button26">Zapisz tabele premii na serwerze</button>
   <script src="Table3/table3.js"></script>
 </body>
 </html>

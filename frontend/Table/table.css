@@ -92,9 +92,18 @@ input[type="text"] {
     border: 1px solid #ccc;
 }
 
-#labels-container {
-    /* Inne style */
-    width: 200px; /* Ustawienie szerokości */
+#container-wrapper {
+    display: flex; /* Ustawienie kontenera na flexbox */
+    justify-content: center; /* Wyśrodkowanie zawartości względem osi poziomej */
+    align-items: center; /* Wyśrodkowanie zawartości względem osi pionowej */
+    position: absolute; /* Pozycja bezwzględna */
+    top: 100px; /* Odległość od górnej krawędzi strony */
+    left: 50%; /* Wyśrodkowanie w poziomie */
+    transform: translateX(-50%); /* Przesunięcie o połowę szerokości elementu w lewo */
+}
+
+#labels-container, #labels-container-project {
+    width: 300px; /* Ustawienie szerokości */
     padding: 8px; /* Dodanie wypełnienia */
     border: 1px solid #ccc; /* Dodanie obramowania */
     border-radius: 5px; /* Zaokrąglenie rogów */
@@ -105,10 +114,8 @@ input[type="text"] {
     display: flex; /* Ustawienie kontenera na flexbox */
     justify-content: center; /* Wyśrodkowanie zawartości względem osi poziomej */
     align-items: center; /* Wyśrodkowanie zawartości względem osi pionowej */
-    position: absolute; /* Pozycja bezwzględna */
-    top: 100px; /* Odległość od górnej krawędzi strony */
-    left: 50%; /* Wyśrodkowanie w poziomie */
-    transform: translateX(-50%); /* Przesunięcie o połowę szerokości elementu w lewo */
+    gap: 10px; /* Dodanie odstępu między elementami wewnątrz kontenera */
+    margin: 0 10px; /* Dodanie marginesu między kontenerami */
 }
 
 #input9, #input10{
