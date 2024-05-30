@@ -542,3 +542,16 @@ app.post('/save-premia-data', (req, res) => {
         });
     });
 });
+
+app.get('/get-premia-data', (req, res) => {
+    const csvFilePath = path.join(__dirname, 'frontend/premiaPraconiwkaPerProjekt.csv');
+    
+    fs.readFile(csvFilePath, 'utf8', (err, fileData) => {
+        if (err) {
+            console.error('Error reading CSV file:', err);
+            return res.status(500).json({ message: 'Error reading CSV file' });
+        }
+        
+        res.send(fileData);
+    });
+});

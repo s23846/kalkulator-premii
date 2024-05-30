@@ -3,9 +3,119 @@ premiaPodsumowanie.style.display="none";
 button26.style.display="none";
 
 document.addEventListener("DOMContentLoaded", function() {
-    fillLabelsFromLocalStorage()
+    fillLabelsFromLocalStorage();
     loadDataForBonusTable();
 });
+
+function loadBonusDataFromServer() {
+    fetch('/get-premia-data')
+        .then(response => response.text())
+        .then(csvData => {
+            const labels = document.querySelectorAll('#labels-container label');
+            if (labels.length < 3) {
+                console.error('Missing employee labels');
+                return;
+            }
+            const employeeId = labels[0].textContent.replace('ID: ', '').trim();
+            const employeeName = labels[1].textContent.replace('Imię: ', '').trim();
+            const employeeSurname = labels[2].textContent.replace('Nazwisko: ', '').trim();
+
+            const projectLabels = document.querySelectorAll('#labels-container-project label');
+            if (projectLabels.length < 2) {
+                console.error('Missing project labels');
+                return;
+            }
+            const projectId = projectLabels[0].textContent.replace('ID Projektu: ', '').trim();
+            const projectName = projectLabels[1].textContent.replace('Nazwa Projektu: ', '').trim();
+
+            parseAndFillBonusTable(csvData, employeeId, employeeName, employeeSurname, projectId, projectName);
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function parseAndFillBonusTable(csvData, employeeId, employeeName, employeeSurname, projectId, projectName) {
+    const rows = csvData.split('\n\n');
+    const employeeData = rows.find(row => row.startsWith(`Dane pracownika: ID: ${employeeId}`) && row.includes(`Dane projektu: ID: ${projectId}`));
+
+    if (!employeeData) {
+        console.log('No data found for the specified employee and project.');
+        return;
+    }
+
+    const tableBody = document.getElementById("premiaPodsumowanieCialo");
+    tableBody.innerHTML = '';
+
+    const [header, ...dataRows] = employeeData.split('\n');
+    dataRows.forEach(row => {
+        const rowData = row.split(',');
+        const tableRow = document.createElement('tr');
+        rowData.forEach((cellData, index) => {
+            const cell = document.createElement('td');
+            if (index === 1 || (index >= 3 && (index - 3) % 3 === 1)) { // Edytowalne pola: wartość projektu i udział w KPI
+                cell.contentEditable = true;
+            }
+            cell.textContent = cellData !== 'null' ? cellData : '';
+            tableRow.appendChild(cell);
+        });
+        tableBody.appendChild(tableRow);
+    });
+
+    document.getElementById("premiaPodsumowanie").style.display = "table";
+    document.getElementById("button26").style.display = "inline-block";
+
+    // Reattach the event listener for calculations
+    attachInputEventListener();
+}
+
+function attachInputEventListener() {
+    const tableBody = document.getElementById("premiaPodsumowanieCialo");
+
+    tableBody.addEventListener('input', function(event) {
+        const row = event.target.parentElement;
+        const projectValueCell = row.cells[1]; // Zakładając, że 2 komórka to "Wartość projektu"
+        const maxBonusCell = row.cells[2]; // Zakładając, że 3 komórka to "MAX wartość premii"
+
+        if (projectValueCell && maxBonusCell) {
+            let projectValue = parseFloat(projectValueCell.innerText.replace('zł', '').trim());
+
+            if (!isNaN(projectValue)) {
+                const rentownosc = rentownosciData.find(r => r.projectId === projectId && projectValue >= r.lowerBound && projectValue <= r.upperBound);
+
+                if (rentownosc) {
+                    let maxBonus;
+                    if (projectValue === rentownosc.upperBound) {
+                        maxBonus = rentownosc.maxBonus;
+                    } else {
+                        maxBonus = (projectValue * rentownosc.percent / 100).toFixed(2);
+                    }
+                    maxBonusCell.innerText = `${maxBonus} zł`;
+                } else {
+                    maxBonusCell.innerText = '';
+                }
+
+                let sumaPremii = 0;
+                kpis.forEach((kpi, index) => {
+                    const participationCell = row.cells[4 + 3 * index]; // Dostosowany indeks dla udziału
+                    const bonusCell = row.cells[5 + 3 * index]; // Dostosowany indeks dla premii
+
+                    if (participationCell && bonusCell) {
+                        let participation = parseFloat(participationCell.innerText.replace('%', '').trim());
+                        if (!isNaN(participation)) {
+                            const premiaZaKPI = (projectValue * kpi.weight / 100 * participation / 100 * rentownosc.percent / 100).toFixed(2);
+                            bonusCell.innerText = `${premiaZaKPI} zł`;
+                            sumaPremii += parseFloat(premiaZaKPI);
+                        } else {
+                            bonusCell.innerText = '';
+                        }
+                    }
+                });
+
+                const sumaPremiiCell = row.cells[row.cells.length - 1]; // Zakładając, że ostatnia komórka to "Suma Premii"
+                sumaPremiiCell.innerText = `${sumaPremii.toFixed(2)} zł`;
+            }
+        }
+    });
+}
 
 function fillLabelsFromLocalStorage() {
     var employeeId = localStorage.getItem('selectedEmployeeId');
@@ -123,8 +233,9 @@ function fillTableWithBonusData(csvData, assignedProjects, kpiData) {
         assignProjectToContainer();
         projektyDoPremii.style.display="none";
         document.getElementById("button25").style.display = "none";  
-        document.getElementById("button26").style.display = "inline-block";  
+        document.getElementById("button26").style.display = "inline-block"; 
         showMonthlyBonusTable(kpiData);
+        loadBonusDataFromServer(); 
     });
 }
 
@@ -164,7 +275,7 @@ function showMonthlyBonusTable(kpiData) {
     // Sprawdź, czy projekt istnieje w KPI
     const projectExists = checkIfProjectExistsInKPI(kpiData, projectId, projectName);
     if (!projectExists) {
-        alert('Wybrany projekt nie istnieje w KPI.');
+        alert('Wybrany projekt nie posiada przypisanychKPI.');
         document.getElementById("button26").style.display = "none";
         return;
     }
