@@ -16,6 +16,8 @@ document.addEventListener("DOMContentLoaded", function() {
             restoreMonthlyBonusTable(); // Funkcja do przywracania miesięcznych danych
         } else if (selectedOption === "option1") {
             showQuarterlyBonusTable(); // Funkcja dla kwartalnych danych
+        } else if (selectedOption === "option2") {
+            showYearlyBonusTable(); // Funkcja dla rocznych danych
         }
     });
 });
@@ -621,4 +623,59 @@ function showQuarterlyBonusTable() {
             tableBody.appendChild(newRow);
         }
     });
+}
+
+function showYearlyBonusTable() {
+    const tableBody = document.getElementById("premiaPodsumowanieCialo");
+    const tableHeader = document.getElementById("tableHeader");
+    
+    // Zmiana pierwszego nagłówka na "Rok"
+    tableHeader.cells[0].textContent = "Rok";
+    
+    //pobranie roku z selecta aby wstawić go do wiersza tabeli
+    const selectedYear = document.getElementById("yearSelect").options[document.getElementById("yearSelect").selectedIndex].text;
+    const rows = Array.from(tableBody.rows);
+
+    const kpiWeights = [];
+    if (rows.length > 0) {
+        const firstRow = rows[0];
+        for (let i = 3; i < firstRow.cells.length - 1; i += 3) {
+            const kpiWeight = firstRow.cells[i].textContent;
+            kpiWeights.push(kpiWeight);
+        }
+    }
+
+    tableBody.innerHTML = '';
+
+    if (rows.length > 0) {
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `<td>${selectedYear}</td>`;
+        
+        let projectValueSum = 0;
+        let maxPremiaSum = 0;
+        let kpiParticipationSums = new Array(kpiWeights.length).fill(0);
+        let kpiBonusSums = new Array(kpiWeights.length).fill(0);
+        let totalPremiaSum = 0;
+
+        rows.forEach(row => {
+            projectValueSum += parseFloat(row.cells[1].textContent) || 0;
+            maxPremiaSum += parseFloat(row.cells[2].textContent) || 0;
+
+            for (let i = 0; i < kpiParticipationSums.length; i++) {
+                const participationIndex = 4 + i * 3;
+                const bonusIndex = 5 + i * 3;
+                kpiParticipationSums[i] += parseFloat(row.cells[participationIndex].textContent) || 0;
+                kpiBonusSums[i] += parseFloat(row.cells[bonusIndex].textContent) || 0;
+            }
+            totalPremiaSum += parseFloat(row.cells[row.cells.length - 1].textContent) || 0;
+        });
+
+        newRow.innerHTML += `<td>${projectValueSum.toFixed(2)} zł</td><td>${maxPremiaSum.toFixed(2)} zł</td>`;
+        for (let i = 0; i < kpiWeights.length; i++) {
+            const participationSum = kpiParticipationSums[i];
+            newRow.innerHTML += `<td>${kpiWeights[i]}</td><td>${(participationSum/1200).toFixed(2)}%</td><td>${kpiBonusSums[i].toFixed(2)} zł</td>`;
+        }
+        newRow.innerHTML += `<td>${totalPremiaSum.toFixed(2)} zł</td>`;
+        tableBody.appendChild(newRow);
+    }
 }
