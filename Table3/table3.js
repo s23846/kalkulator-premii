@@ -1,12 +1,11 @@
 //OBSŁUGA TABEL PREMII
-premiaPodsumowanie.style.display="none";
-button26.style.display="none";
-yearSelect.style.display="none";
-saveDataToFile.style.display="none";
-typeTimeSelect.style.display="none";
+premiaPodsumowanie.style.display = "none";
+button26.style.display = "none";
+yearSelect.style.display = "none";
+saveDataToFile.style.display = "none";
+typeTimeSelect.style.display = "none";
 
 let originalTableData = null; // Zmienna do przechowywania oryginalnych danych tabeli
-
 document.addEventListener("DOMContentLoaded", function() {
     fillLabelsFromLocalStorage();
     loadDataForBonusTable();
@@ -19,6 +18,9 @@ document.addEventListener("DOMContentLoaded", function() {
         } else if (selectedOption === "option2") {
             showYearlyBonusTable(); // Funkcja dla rocznych danych
         }
+    });
+    document.getElementById("yearSelect").addEventListener("change", function() {
+        loadDataForBonusTable(true);
     });
 });
 
@@ -37,7 +39,7 @@ function restoreMonthlyBonusTable() {
         console.warn('Brak oryginalnych danych tabeli do przywrócenia.');
         return;
     }
-    
+
     const tableBody = document.getElementById("premiaPodsumowanieCialo");
     const tableHeader = document.getElementById("tableHeader");
     tableHeader.cells[0].textContent = "Miesiąc";
@@ -57,7 +59,7 @@ function restoreMonthlyBonusTable() {
     attachInputEventListener();
 }
 
-function loadBonusDataFromServer() {
+function loadBonusDataFromServer(kpiData) {
     const selectedYear = yearSelect.options[yearSelect.selectedIndex].text; // Pobieranie tekstu opcji wybranego roku
 
     fetch('/get-premia-data')
@@ -80,47 +82,69 @@ function loadBonusDataFromServer() {
             const projectId = projectLabels[0].textContent.replace('ID Projektu: ', '').trim();
             const projectName = projectLabels[1].textContent.replace('Nazwa Projektu: ', '').trim();
 
-            globalKpiData = csvData;
-            parseAndFillBonusTable(csvData, selectedYear, employeeId, employeeName, employeeSurname, projectId, projectName);
+            parseAndFillBonusTable(csvData, selectedYear, employeeId, employeeName, employeeSurname, projectId, projectName, kpiData);
             storeOriginalTableData();
         })
         .catch(error => console.error('Error:', error));
 }
 
-function parseAndFillBonusTable(csvData, selectedYear, employeeId, employeeName, employeeSurname, projectId, projectName) {
+function parseAndFillBonusTable(csvData, selectedYear, employeeId, employeeName, employeeSurname, projectId, projectName, kpiData) {
     const rows = csvData.split('\n\n');
     const employeeData = rows.find(row => row.startsWith(`Rok: ${selectedYear}, Dane pracownika: ID: ${employeeId}`) && row.includes(`Dane projektu: ID: ${projectId}`));
 
-    if (!employeeData) {
-        console.log('No data found for the specified year, employee, and project.');
-        return;
-    }
-
     const tableBody = document.getElementById("premiaPodsumowanieCialo");
     tableBody.innerHTML = '';
-
-    const [header, ...dataRows] = employeeData.split('\n');
-    dataRows.forEach(row => {
-        const rowData = row.split(',');
-        const tableRow = document.createElement('tr');
-        rowData.forEach((cellData, index) => {
-            const cell = document.createElement('td');
-            if (index === 1 || (index >= 3 && (index - 3) % 3 === 1)) {
-                cell.contentEditable = true;
-            }
-            cell.textContent = cellData !== 'null' ? cellData : '';
-            tableRow.appendChild(cell);
+    let date = employeeData?.split('\n') || [];
+    console.log(csvData, projectId);
+    if (date.length > 0) {
+        const rows = csvData.split('\n\n');
+        const employeeData = rows.find(row => row.startsWith(`Rok: ${selectedYear}, Dane pracownika: ID: ${employeeId}`) && row.includes(`Dane projektu: ID: ${projectId}`));
+        let date = employeeData?.split('\n') || [];
+        const [header, ...dataRows] = date;
+        dataRows.forEach(row => {
+            const rowData = row.split(',');
+            const tableRow = document.createElement('tr');
+            rowData.forEach((cellData, index) => {
+                const cell = document.createElement('td');
+                if (index === 1 || (index >= 3 && (index - 3) % 3 === 1)) {
+                    cell.contentEditable = true;
+                }
+                cell.textContent = cellData !== 'null' ? cellData : '';
+                tableRow.appendChild(cell);
+            });
+            tableBody.appendChild(tableRow);
         });
-        tableBody.appendChild(tableRow);
-    });
+    } else {
+        const rows = csvData.split('\n\n');
+        const employeeData = rows.find(row => row.includes(`Dane projektu: ID: ${projectId}`));
+        let date = employeeData?.split('\n') || [];
+        const [header, ...dataRows] = date;
+        dataRows.forEach(row => {
+            const rowData = row.split(',');
+            const tableRow = document.createElement('tr');
+            rowData.forEach((cellData, index) => {
+                const cell = document.createElement('td');
+                if (index === 1 || (index >= 3 && (index - 3) % 3 === 1)) {
+                    cell.contentEditable = true;
+                } else {
+                    if (index === 0 || cellData.includes('%')) {
+                        cell.textContent = cellData !== 'null' ? cellData : '';
+                    }
+                }
+
+                tableRow.appendChild(cell);
+            });
+            tableBody.appendChild(tableRow);
+        });
+    }
 
     document.getElementById("premiaPodsumowanie").style.display = "table";
     document.getElementById("button26").style.display = "inline-block";
 
-    attachInputEventListener();
+    attachInputEventListener(csvData, selectedYear, employeeId, employeeName, employeeSurname, projectId, projectName, kpiData);
 }
 
-function attachInputEventListener() {
+function attachInputEventListener(csvData, selectedYear, employeeId, employeeName, employeeSurname, projectId, projectName, kpiData) {
     const tableBody = document.getElementById("premiaPodsumowanieCialo");
 
     tableBody.addEventListener('input', function(event) {
@@ -132,46 +156,77 @@ function attachInputEventListener() {
             let projectValue = parseFloat(projectValueCell.innerText.replace('zł', '').trim());
 
             if (!isNaN(projectValue)) {
-                const rentownosc = rentownosciData.find(r => r.projectId === projectId && projectValue >= r.lowerBound && projectValue <= r.upperBound);
+                // Load rentowności data from CSV file
+                fetch('frontend/listaRentownościProjektu.csv')
+                    .then(response => response.text())
+                    .then(csvData => {
+                        const rentownościRows = csvData.split('\n').map(row => row.split(','));
+                        const rentownościData = rentownościRows.map(row => ({
+                            projectId: row[0],
+                            lowerBound: parseFloat(row[2]),
+                            upperBound: parseFloat(row[3]),
+                            percent: parseFloat(row[4]),
+                            maxBonus: parseFloat(row[5])
+                        }));
+                        const rentownosciRows = csvData.split('\n').map(row => row.split(','));
+                        const rentownosciData = rentownosciRows.map(row => ({
+                            projectId: row[0],
+                            lowerBound: parseFloat(row[2]),
+                            upperBound: parseFloat(row[3]),
+                            percent: parseFloat(row[4]),
+                            maxBonus: parseFloat(row[5])
+                        }));
+                        const rentownosc = rentownosciData.find(r => r.projectId === projectId && projectValue >= r.lowerBound && projectValue <= r.upperBound);
 
-                if (rentownosc) {
-                    let maxBonus;
-                    if (projectValue === rentownosc.upperBound) {
-                        maxBonus = rentownosc.maxBonus;
-                    } else {
-                        maxBonus = (projectValue * rentownosc.percent / 100).toFixed(2);
-                    }
-                    maxBonusCell.innerText = `${maxBonus} zł`;
-                } else {
-                    maxBonusCell.innerText = '';
-                }
-
-                let sumaPremii = 0;
-                kpis.forEach((kpi, index) => {
-                    const participationCell = row.cells[4 + 3 * index]; // Dostosowany indeks dla udziału
-                    const bonusCell = row.cells[5 + 3 * index]; // Dostosowany indeks dla premii
-
-                    if (participationCell && bonusCell) {
-                        let participation = parseFloat(participationCell.innerText.replace('%', '').trim());
-
-                        // Walidacja udziału w KPI
-                        if (participation > 100) {
-                            participationCell.innerText = '100';
-                            participation = 100;
-                        }
-
-                        if (!isNaN(participation)) {
-                            const premiaZaKPI = (projectValue * kpi.weight / 100 * participation / 100 * rentownosc.percent / 100).toFixed(2);
-                            bonusCell.innerText = `${premiaZaKPI} zł`;
-                            sumaPremii += parseFloat(premiaZaKPI);
+                        if (rentownosc) {
+                            let maxBonus;
+                            if (projectValue === rentownosc.upperBound) {
+                                maxBonus = rentownosc.maxBonus;
+                            } else {
+                                maxBonus = (projectValue * rentownosc.percent / 100).toFixed(2);
+                            }
+                            maxBonusCell.innerText = `${maxBonus} zł`;
                         } else {
-                            bonusCell.innerText = '';
+                            maxBonusCell.innerText = '';
                         }
-                    }
-                });
+                        console.log(kpiData);
+                        const projectKPI = parseKPIForProject(kpiData, projectId, projectName) || [];
+                        let kpis = [];
+                        projectKPI.forEach((kpi, index) => {
+                            kpis.push({
+                                id: kpi[0],
+                                name: kpi[1],
+                                weight: parseFloat(kpi[2]),
+                                bonus: kpi[5]
+                            });
+                        });
+                        let sumaPremii = 0;
+                        kpis.forEach((kpi, index) => {
+                            const participationCell = row.cells[4 + 3 * index]; // Dostosowany indeks dla udziału
+                            const bonusCell = row.cells[5 + 3 * index]; // Dostosowany indeks dla premii
 
-                const sumaPremiiCell = row.cells[row.cells.length - 1]; // Zakładając, że ostatnia komórka to "Suma Premii"
-                sumaPremiiCell.innerText = `${sumaPremii.toFixed(2)} zł`;
+                            if (participationCell && bonusCell) {
+                                let participation = parseFloat(participationCell.innerText.replace('%', '').trim());
+
+                                // Walidacja udziału w KPI
+                                if (participation > 100) {
+                                    participationCell.innerText = '100';
+                                    participation = 100;
+                                }
+
+                                if (!isNaN(participation)) {
+                                    const premiaZaKPI = (projectValue * kpi.weight / 100 * participation / 100 * rentownosc.percent / 100).toFixed(2);
+                                    bonusCell.innerText = `${premiaZaKPI} zł`;
+                                    sumaPremii += parseFloat(premiaZaKPI);
+                                } else {
+                                    bonusCell.innerText = '';
+                                }
+                            }
+                        });
+
+                        const sumaPremiiCell = row.cells[row.cells.length - 1]; // Zakładając, że ostatnia komórka to "Suma Premii"
+                        sumaPremiiCell.innerText = `${sumaPremii.toFixed(2)} zł`;
+                    });
             }
         }
     });
@@ -181,7 +236,7 @@ function fillLabelsFromLocalStorage() {
     var employeeId = localStorage.getItem('selectedEmployeeId');
     var employeeName = localStorage.getItem('selectedEmployeeName');
     var employeeSurname = localStorage.getItem('selectedEmployeeSurname');
-    
+
     if (employeeId && employeeName && employeeSurname) {
         createLabels(employeeId, employeeName, employeeSurname);
     } else {
@@ -204,15 +259,15 @@ function createLabels(id, name, surname) {
     labelsContainer.appendChild(surnameLabel);
 }
 
-function loadDataForBonusTable() {
+function loadDataForBonusTable(x) {
     const labels = document.querySelectorAll('#labels-container label');
     const employeeId = labels[0].textContent.replace('ID: ', '').trim();
     const employeeName = labels[1].textContent.replace('Imię: ', '').trim();
     const employeeSurname = labels[2].textContent.replace('Nazwisko: ', '').trim();
-    loadProjectsAndKPIData(employeeId, employeeName, employeeSurname);
+    loadProjectsAndKPIData(employeeId, employeeName, employeeSurname, x);
 }
 
-function loadProjectsAndKPIData(employeeId, employeeName, employeeSurname) {
+function loadProjectsAndKPIData(employeeId, employeeName, employeeSurname, x) {
     Promise.all([
         fetch('frontend/listaProjektów.csv').then(response => response.text()),
         fetch('/get-pracownikow-per-projekt').then(response => response.text()),
@@ -224,7 +279,7 @@ function loadProjectsAndKPIData(employeeId, employeeName, employeeSurname) {
             document.getElementById("tableBodyProjektyWPremii").innerHTML = ''; // Pokaż pustą tabelę
             return;
         }
-        fillTableWithBonusData(projectsData, assignedProjects, kpiData);
+        fillTableWithBonusData(projectsData, assignedProjects, kpiData, x);
     }).catch(error => {
         console.error('Błąd:', error);
         alert('Wystąpił błąd podczas pobierania danych.');
@@ -241,7 +296,7 @@ function parseEmployeeProjects(employeesProjectsData, employeeId, employeeName, 
         if (row === '') {
             return;
         }
-        
+
         const projectHeaderMatch = row.match(/^Id projektu to: (\d+), Nazwa projektu to: (.+):$/);
         if (projectHeaderMatch) {
             currentProjectId = projectHeaderMatch[1];
@@ -258,7 +313,7 @@ function parseEmployeeProjects(employeesProjectsData, employeeId, employeeName, 
     return assignedProjects;
 }
 
-function fillTableWithBonusData(csvData, assignedProjects, kpiData) {
+function fillTableWithBonusData(csvData, assignedProjects, kpiData, x) {
     const tableBody = document.getElementById("tableBodyProjektyWPremii");
     tableBody.innerHTML = '';
 
@@ -288,18 +343,31 @@ function fillTableWithBonusData(csvData, assignedProjects, kpiData) {
         }
     });
 
+    if (x) {
+        projektyDoPremii.style.display = "none";
+        filterContainerProject.style.display = "none";
+        document.getElementById("button25").style.display = "none";
+        saveDataToFile.style.display = "inline-block";
+        document.getElementById("button26").style.display = "inline-block";
+        yearSelect.style.display = "inline-block"
+        typeTimeSelect.style.display = "inline-block";
+        showMonthlyBonusTable(kpiData);
+        loadBonusDataFromServer(kpiData);
+        restoreMonthlyBonusTable();
+    }
+
     document.getElementById("button25").addEventListener("click", function(event) {
         event.preventDefault();
         assignProjectToContainer();
-        projektyDoPremii.style.display="none";
-        filterContainerProject.style.display= "none";
-        document.getElementById("button25").style.display = "none";  
-        saveDataToFile.style.display="inline-block";
+        projektyDoPremii.style.display = "none";
+        filterContainerProject.style.display = "none";
+        document.getElementById("button25").style.display = "none";
+        saveDataToFile.style.display = "inline-block";
         document.getElementById("button26").style.display = "inline-block";
-        yearSelect.style.display="inline-block" 
-        typeTimeSelect.style.display="inline-block";
+        yearSelect.style.display = "inline-block"
+        typeTimeSelect.style.display = "inline-block";
         showMonthlyBonusTable(kpiData);
-        loadBonusDataFromServer(); 
+        loadBonusDataFromServer(kpiData);
     });
 }
 
@@ -334,7 +402,11 @@ function showMonthlyBonusTable(kpiData) {
         return;
     }
 
-    const { projectId, projectName } = projectInfo;
+    const {
+        projectId,
+        projectName
+    } = projectInfo;
+    console.log(kpiData, projectId, projectName);
     const projectKPI = parseKPIForProject(kpiData, projectId, projectName);
     if (projectKPI.length === 0) {
         alert('Wybrany projekt nie posiada przypisanych KPI.');
@@ -349,7 +421,12 @@ function showMonthlyBonusTable(kpiData) {
 
     let kpis = [];
     projectKPI.forEach((kpi, index) => {
-        kpis.push({ id: kpi[0], name: kpi[1], weight: parseFloat(kpi[2]), bonus: kpi[5] });
+        kpis.push({
+            id: kpi[0],
+            name: kpi[1],
+            weight: parseFloat(kpi[2]),
+            bonus: kpi[5]
+        });
         tableHeader.innerHTML += `<th>KPI: ${kpi[1]}</th><th>Udział w KPI ${index + 1}</th><th>Premia za KPI ${index + 1}</th>`;
     });
 
@@ -377,7 +454,6 @@ function showMonthlyBonusTable(kpiData) {
                 percent: parseFloat(row[4]),
                 maxBonus: parseFloat(row[5])
             }));
-
             tableBody.addEventListener('input', function(event) {
                 const row = event.target.parentElement;
                 const projectValueCell = row.cells[1];
@@ -433,7 +509,7 @@ function showMonthlyBonusTable(kpiData) {
         .catch(error => console.error('Error loading rentowności data:', error));
 
     document.getElementById("premiaPodsumowanie").style.display = "table";
-    document.getElementById("button26").style.display = "inline-block"; 
+    document.getElementById("button26").style.display = "inline-block";
 }
 
 function getProjectInfoFromLabels() {
@@ -443,11 +519,14 @@ function getProjectInfoFromLabels() {
 
     const projectId = labels[0].textContent.replace('ID Projektu: ', '').trim();
     const projectName = labels[1].textContent.replace('Nazwa Projektu: ', '').trim();
-    return { projectId, projectName };
+    return {
+        projectId,
+        projectName
+    };
 }
 
 function parseKPIForProject(kpiData, projectId, projectName) {
-    const kpiRows = kpiData.split('\n');
+    const kpiRows = kpiData?.split('\n') || [];
     let projectKPI = [];
     let currentProjectId = null;
 
@@ -456,7 +535,7 @@ function parseKPIForProject(kpiData, projectId, projectName) {
         if (row === '') {
             return;
         }
-        
+
         const projectHeaderMatch = row.match(/^Id projektu to: (\d+), Nazwa projektu to: (.+):$/);
         if (projectHeaderMatch) {
             currentProjectId = projectHeaderMatch[1];
@@ -509,25 +588,25 @@ function saveTableToCSV() {
     }
 
     fetch('/save-premia-data', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(dataToSend)
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.message);
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        alert('Wystąpił błąd podczas zapisywania danych.');
-    });
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataToSend)
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Wystąpił błąd podczas zapisywania danych.');
+        });
 }
 
 document.getElementById("saveDataToFile").addEventListener("click", function(event) {
     event.preventDefault(); // Zapobiega domyślnej akcji przycisku
-    
+
     // Pobierz tabelę
     var table = document.getElementById("premiaPodsumowanieCialo");
 
@@ -575,7 +654,12 @@ function showQuarterlyBonusTable() {
     tableHeader.cells[0].textContent = "Kwartał";
     const rows = Array.from(tableBody.rows);
 
-    const quarters = [[], [], [], []];
+    const quarters = [
+        [],
+        [],
+        [],
+        []
+    ];
     rows.forEach((row, index) => {
         const quarterIndex = Math.floor(index / 3);
         quarters[quarterIndex].push(row);
@@ -595,7 +679,7 @@ function showQuarterlyBonusTable() {
         if (quarter.length > 0) {
             const newRow = document.createElement('tr');
             newRow.innerHTML = `<td>Kwartal ${index + 1}</td>`;
-            
+
             let projectValueSum = 0;
             let maxPremiaSum = 0;
             let kpiParticipationSums = new Array(kpiWeights.length).fill(0);
@@ -629,10 +713,10 @@ function showQuarterlyBonusTable() {
 function showYearlyBonusTable() {
     const tableBody = document.getElementById("premiaPodsumowanieCialo");
     const tableHeader = document.getElementById("tableHeader");
-    
+
     // Zmiana pierwszego nagłówka na "Rok"
     tableHeader.cells[0].textContent = "Rok";
-    
+
     //pobranie roku z selecta aby wstawić go do wiersza tabeli
     const selectedYear = document.getElementById("yearSelect").options[document.getElementById("yearSelect").selectedIndex].text;
     const rows = Array.from(tableBody.rows);
@@ -651,7 +735,7 @@ function showYearlyBonusTable() {
     if (rows.length > 0) {
         const newRow = document.createElement('tr');
         newRow.innerHTML = `<td>${selectedYear}</td>`;
-        
+
         let projectValueSum = 0;
         let maxPremiaSum = 0;
         let kpiParticipationSums = new Array(kpiWeights.length).fill(0);
@@ -698,7 +782,7 @@ function updateOptions(view) {
     }
 }
 
-document.getElementById('typeTimeSelect').addEventListener('change', function () {
+document.getElementById('typeTimeSelect').addEventListener('change', function() {
     updateOptions(this.value);
 });
 
