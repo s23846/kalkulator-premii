@@ -30,7 +30,6 @@ function storeOriginalTableData() {
             isEditable: cell.contentEditable === "true"
         }));
     });
-    console.log('Oryginalne dane tabeli zostały zapisane:', originalTableData);
 }
 
 function restoreMonthlyBonusTable() {
@@ -56,7 +55,6 @@ function restoreMonthlyBonusTable() {
         tableBody.appendChild(row);
     });
     attachInputEventListener();
-    console.log('Tabela została przywrócona do stanu miesięcznego.');
 }
 
 function loadBonusDataFromServer() {
@@ -679,3 +677,27 @@ function showYearlyBonusTable() {
         tableBody.appendChild(newRow);
     }
 }
+
+function updateOptions(view) {
+    const typeTimeSelect = document.getElementById('typeTimeSelect');
+    const options = typeTimeSelect.options;
+
+    // Enable all options first
+    for (let i = 0; i < options.length; i++) {
+        options[i].disabled = false;
+    }
+
+    // Apply restrictions based on the selected view
+    if (view === 'option1' || view === 'option2') { // If quarterly or yearly
+        for (let i = 1; i < options.length; i++) {
+            options[i].disabled = true;
+        }
+    }
+}
+
+document.getElementById('typeTimeSelect').addEventListener('change', function () {
+    updateOptions(this.value);
+});
+
+// Trigger change event on page load to apply initial restrictions
+document.getElementById('typeTimeSelect').dispatchEvent(new Event('change'));
