@@ -1,7 +1,7 @@
-Dane pracownika: ID: 5, Imię: MIREK, Nazwisko: DOBRY, Dane projektu: ID: 3, Nazwa projektu: DUPA
-Styczeń,90000,900.00,10%,50,45.00,40%,20,72.00,30%,30,81.00,20%,100,180.00,378.00
-Luty,100000,1000,10%,100,100.00,40%,10,40.00,30%,45,135.00,20%,100,200.00,475.00
-Marzec,90000,900.00,10%,52,46.80,40%,35,126.00,30%,100,270.00,20%,10,18.00,460.80
+Rok: 2023, Dane pracownika: ID: 5, Imię: MIREK, Nazwisko: DOBRY, Dane projektu: ID: 3, Nazwa projektu: DUPA
+Styczeń,90000,900.00,10%,52,46.80,40%,20,72.00,30%,75,202.50,20%,25,45.00,366.30
+Luty,100000,1000,10%,100,100.00,40%,30,120.00,30%,60,180.00,20%,35,70.00,470.00
+Marzec,80000,800.00,10%,75,60.00,40%,100,320.00,30%,55,132.00,20%,45,72.00,584.00
 Kwiecień,null,null,10%,null,null,40%,null,null,30%,null,null,20%,null,null,null
 Maj,null,null,10%,null,null,40%,null,null,30%,null,null,20%,null,null,null
 Czerwiec,null,null,10%,null,null,40%,null,null,30%,null,null,20%,null,null,null

@@ -515,9 +515,9 @@ app.post('/save-premia-data', (req, res) => {
         }
 
         let existingData = fileData.split('\n\n').filter(row => row.trim().length > 0);
-        const employeeHeader = `Dane pracownika: ID: ${data.employeeId}, Imię: ${data.employeeName}, Nazwisko: ${data.employeeSurname}, Dane projektu: ID: ${data.projectId}, Nazwa projektu: ${data.projectName}`;
+        const employeeHeader = `Rok: ${data.year}, Dane pracownika: ID: ${data.employeeId}, Imię: ${data.employeeName}, Nazwisko: ${data.employeeSurname}, Dane projektu: ID: ${data.projectId}, Nazwa projektu: ${data.projectName}`;
 
-        // Znaleźć istniejący wpis pracownika i projektu
+        // Znaleźć istniejący wpis pracownika, projektu i roku
         let employeeIndex = existingData.findIndex(row => row.startsWith(employeeHeader));
 
         // Nowe dane pracownika do zapisania

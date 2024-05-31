@@ -58,6 +58,8 @@ function restoreMonthlyBonusTable() {
 }
 
 function loadBonusDataFromServer() {
+    const selectedYear = yearSelect.options[yearSelect.selectedIndex].text; // Pobieranie tekstu opcji wybranego roku
+
     fetch('/get-premia-data')
         .then(response => response.text())
         .then(csvData => {
@@ -79,18 +81,18 @@ function loadBonusDataFromServer() {
             const projectName = projectLabels[1].textContent.replace('Nazwa Projektu: ', '').trim();
 
             globalKpiData = csvData;
-            parseAndFillBonusTable(csvData, employeeId, employeeName, employeeSurname, projectId, projectName);
-            storeOriginalTableData(); // Przenieś tutaj zapis oryginalnych danych tabeli
+            parseAndFillBonusTable(csvData, selectedYear, employeeId, employeeName, employeeSurname, projectId, projectName);
+            storeOriginalTableData();
         })
         .catch(error => console.error('Error:', error));
 }
 
-function parseAndFillBonusTable(csvData, employeeId, employeeName, employeeSurname, projectId, projectName) {
+function parseAndFillBonusTable(csvData, selectedYear, employeeId, employeeName, employeeSurname, projectId, projectName) {
     const rows = csvData.split('\n\n');
-    const employeeData = rows.find(row => row.startsWith(`Dane pracownika: ID: ${employeeId}`) && row.includes(`Dane projektu: ID: ${projectId}`));
+    const employeeData = rows.find(row => row.startsWith(`Rok: ${selectedYear}, Dane pracownika: ID: ${employeeId}`) && row.includes(`Dane projektu: ID: ${projectId}`));
 
     if (!employeeData) {
-        console.log('No data found for the specified employee and project.');
+        console.log('No data found for the specified year, employee, and project.');
         return;
     }
 
@@ -103,7 +105,7 @@ function parseAndFillBonusTable(csvData, employeeId, employeeName, employeeSurna
         const tableRow = document.createElement('tr');
         rowData.forEach((cellData, index) => {
             const cell = document.createElement('td');
-            if (index === 1 || (index >= 3 && (index - 3) % 3 === 1)) { // Edytowalne pola: wartość projektu i udział w KPI
+            if (index === 1 || (index >= 3 && (index - 3) % 3 === 1)) {
                 cell.contentEditable = true;
             }
             cell.textContent = cellData !== 'null' ? cellData : '';
@@ -115,7 +117,6 @@ function parseAndFillBonusTable(csvData, employeeId, employeeName, employeeSurna
     document.getElementById("premiaPodsumowanie").style.display = "table";
     document.getElementById("button26").style.display = "inline-block";
 
-    // Reattach the event listener for calculations
     attachInputEventListener();
 }
 
@@ -483,6 +484,7 @@ function saveTableToCSV() {
     const employeeSurname = labels[2].textContent.replace('Nazwisko: ', '').trim();
     const projectId = projectLabels[0].textContent.replace('ID Projektu: ', '').trim();
     const projectName = projectLabels[1].textContent.replace('Nazwa Projektu: ', '').trim();
+    const selectedYear = yearSelect.options[yearSelect.selectedIndex].text; // Pobieranie tekstu opcji
 
     const tableBody = document.getElementById("premiaPodsumowanieCialo");
     const rows = tableBody.getElementsByTagName('tr');
@@ -493,6 +495,7 @@ function saveTableToCSV() {
         employeeSurname: employeeSurname,
         projectId: projectId,
         projectName: projectName,
+        year: selectedYear,
         tableData: []
     };
 
@@ -514,11 +517,11 @@ function saveTableToCSV() {
     })
     .then(response => response.json())
     .then(data => {
-        alert(data.message);  // Informacja zwrotna dla użytkownika
+        alert(data.message);
     })
     .catch((error) => {
         console.error('Error:', error);
-        alert('Wystąpił błąd podczas zapisywania danych.');  // Informacja o błędzie
+        alert('Wystąpił błąd podczas zapisywania danych.');
     });
 }
 
