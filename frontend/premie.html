@@ -18,7 +18,30 @@
         <div id="labels-container-project">
             <!-- Zawartość drugiego kontenera -->
         </div>
-    </div>    
+    </div>   
+    
+    <select id="yearSelect">
+        <option value="option0">2023</option>
+        <option value="option1">2024</option>
+        <option value="option2">2025</option>
+        <option value="option3">2026</option>
+        <option value="option4">2027</option>
+      </select>
+
+      <select id="typeTimeSelect">
+        <option value="option0">Miesięczne</option>
+        <option value="option1">Kwartalne</option>
+        <option value="option2">Roczne</option>
+      </select>
+
+      <div id="filterContainerProject">
+        <label for="filterProjectID">ID:</label>
+        <input type="text" id="filterProjectID">
+        <label for="filterNazwaProejktu">Nazwa Projektu:</label>
+        <input type="text" id="filterNazwaProejktu">
+        <button id="applyFiltersProject">Filtruj</button>
+    </div>
+
     <table id="projektyDoPremii" border="1">
         <thead>
             <tr>
@@ -39,6 +62,7 @@
         </tbody>
     </table>
     <button id="button25">Wybierz projekt</button>
+    <button id="saveDataToFile">Zapisz premie do pliku</button>
     <button id="button26">Zapisz tabele premii na serwerze</button>
   <script src="Table3/table3.js"></script>
 </body>
