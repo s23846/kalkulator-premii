@@ -5,22 +5,57 @@ yearSelect.style.display="none";
 saveDataToFile.style.display="none";
 typeTimeSelect.style.display="none";
 
-let globalKpiData = null;
+let originalTableData = null; // Zmienna do przechowywania oryginalnych danych tabeli
 
 document.addEventListener("DOMContentLoaded", function() {
     fillLabelsFromLocalStorage();
     loadDataForBonusTable();
     document.getElementById("typeTimeSelect").addEventListener("change", function() {
         const selectedOption = this.value;
-    
         if (selectedOption === "option0") {
-            showMonthlyBonusTable(globalKpiData); // Funkcja dla miesięcznych danych
+            restoreMonthlyBonusTable(); // Funkcja do przywracania miesięcznych danych
         } else if (selectedOption === "option1") {
-            showQuarterlyBonusTable(globalKpiData); // Funkcja dla kwartalnych danych
+            showQuarterlyBonusTable(); // Funkcja dla kwartalnych danych
         }
-        // Dodaj kolejną funkcję dla rocznych danych, jeśli to konieczne
     });
 });
+
+function storeOriginalTableData() {
+    const tableBody = document.getElementById("premiaPodsumowanieCialo");
+    originalTableData = Array.from(tableBody.rows).map(row => {
+        return Array.from(row.cells).map(cell => ({
+            content: cell.innerHTML,
+            isEditable: cell.contentEditable === "true"
+        }));
+    });
+    console.log('Oryginalne dane tabeli zostały zapisane:', originalTableData);
+}
+
+function restoreMonthlyBonusTable() {
+    if (!originalTableData) {
+        console.warn('Brak oryginalnych danych tabeli do przywrócenia.');
+        return;
+    }
+    
+    const tableBody = document.getElementById("premiaPodsumowanieCialo");
+    const tableHeader = document.getElementById("tableHeader");
+    tableHeader.cells[0].textContent = "Miesiąc";
+    tableBody.innerHTML = ''; // Wyczyść tabelę
+    originalTableData.forEach(rowData => {
+        const row = document.createElement('tr');
+        rowData.forEach(cellData => {
+            const cell = document.createElement('td');
+            cell.innerHTML = cellData.content;
+            if (cellData.isEditable) {
+                cell.contentEditable = true;
+            }
+            row.appendChild(cell);
+        });
+        tableBody.appendChild(row);
+    });
+    attachInputEventListener();
+    console.log('Tabela została przywrócona do stanu miesięcznego.');
+}
 
 function loadBonusDataFromServer() {
     fetch('/get-premia-data')
@@ -45,6 +80,7 @@ function loadBonusDataFromServer() {
 
             globalKpiData = csvData;
             parseAndFillBonusTable(csvData, employeeId, employeeName, employeeSurname, projectId, projectName);
+            storeOriginalTableData(); // Przenieś tutaj zapis oryginalnych danych tabeli
         })
         .catch(error => console.error('Error:', error));
 }
@@ -298,8 +334,6 @@ function showMonthlyBonusTable(kpiData) {
     }
 
     const { projectId, projectName } = projectInfo;
-
-    // Sprawdź, czy projekt istnieje w KPI
     const projectKPI = parseKPIForProject(kpiData, projectId, projectName);
     if (projectKPI.length === 0) {
         alert('Wybrany projekt nie posiada przypisanych KPI.');
@@ -318,7 +352,6 @@ function showMonthlyBonusTable(kpiData) {
         tableHeader.innerHTML += `<th>KPI: ${kpi[1]}</th><th>Udział w KPI ${index + 1}</th><th>Premia za KPI ${index + 1}</th>`;
     });
 
-    // Dodaj nagłówek dla kolumny "Suma Premii"
     tableHeader.innerHTML += "<th>Suma Premii</th>";
 
     const months = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
@@ -328,11 +361,10 @@ function showMonthlyBonusTable(kpiData) {
         kpis.forEach(kpi => {
             rowHTML += `<td>${kpi.weight}%</td><td contenteditable="true"></td><td></td>`;
         });
-        rowHTML += "<td></td>"; // Dodaj komórkę dla "Suma Premii"
+        rowHTML += "<td></td>";
         row.innerHTML = rowHTML;
     });
 
-    // Load rentowności data from CSV file
     fetch('frontend/listaRentownościProjektu.csv')
         .then(response => response.text())
         .then(csvData => {
@@ -345,11 +377,10 @@ function showMonthlyBonusTable(kpiData) {
                 maxBonus: parseFloat(row[5])
             }));
 
-            // Add an event listener to the table body to calculate the MAX wartość premii, Premia za KPI, and Suma Premii
             tableBody.addEventListener('input', function(event) {
                 const row = event.target.parentElement;
-                const projectValueCell = row.cells[1]; // Assuming 2nd cell is "Wartość projektu"
-                const maxBonusCell = row.cells[2]; // Assuming 3rd cell is "MAX wartość premii"
+                const projectValueCell = row.cells[1];
+                const maxBonusCell = row.cells[2];
 
                 if (projectValueCell && maxBonusCell) {
                     let projectValue = parseFloat(projectValueCell.innerText.replace('zł', '').trim());
@@ -369,16 +400,14 @@ function showMonthlyBonusTable(kpiData) {
                             maxBonusCell.innerText = '';
                         }
 
-                        // Calculate Premia za KPI and Suma Premii
                         let sumaPremii = 0;
                         kpis.forEach((kpi, index) => {
-                            const participationCell = row.cells[4 + 3 * index]; // Adjusted index for participation
-                            const bonusCell = row.cells[5 + 3 * index]; // Adjusted index for bonus
+                            const participationCell = row.cells[4 + 3 * index];
+                            const bonusCell = row.cells[5 + 3 * index];
 
                             if (participationCell && bonusCell) {
                                 let participation = parseFloat(participationCell.innerText.replace('%', '').trim());
 
-                                // Walidacja udziału w KPI
                                 if (participation > 100) {
                                     participationCell.innerText = '100%';
                                     participation = 100;
@@ -394,8 +423,7 @@ function showMonthlyBonusTable(kpiData) {
                             }
                         });
 
-                        // Update Suma Premii cell
-                        const sumaPremiiCell = row.cells[row.cells.length - 1]; // Assuming last cell is "Suma Premii"
+                        const sumaPremiiCell = row.cells[row.cells.length - 1];
                         sumaPremiiCell.innerText = `${sumaPremii.toFixed(2)} zł`;
                     }
                 }
@@ -403,7 +431,6 @@ function showMonthlyBonusTable(kpiData) {
         })
         .catch(error => console.error('Error loading rentowności data:', error));
 
-    // Ukrywanie lub wyświetlanie elementów na dole strony
     document.getElementById("premiaPodsumowanie").style.display = "table";
     document.getElementById("button26").style.display = "inline-block"; 
 }
@@ -539,18 +566,18 @@ document.getElementById("applyFiltersProject").addEventListener("click", functio
     });
 });
 
-function showQuarterlyBonusTable(kpiData) {
+function showQuarterlyBonusTable() {
     const tableBody = document.getElementById("premiaPodsumowanieCialo");
+    const tableHeader = document.getElementById("tableHeader");
+    tableHeader.cells[0].textContent = "Kwartał";
     const rows = Array.from(tableBody.rows);
 
-    // Podziel wiersze na kwartały
     const quarters = [[], [], [], []];
     rows.forEach((row, index) => {
         const quarterIndex = Math.floor(index / 3);
         quarters[quarterIndex].push(row);
     });
 
-    // Pobierz wartości wag KPI z pierwszego wiersza tabeli
     const kpiWeights = [];
     if (rows.length > 0) {
         const firstRow = rows[0];
@@ -592,18 +619,6 @@ function showQuarterlyBonusTable(kpiData) {
             }
             newRow.innerHTML += `<td>${totalPremiaSum.toFixed(2)} zł</td>`;
             tableBody.appendChild(newRow);
-        }
-    });
-
-    // Zapewnij możliwość przełączania z powrotem na widok miesięczny
-    const typeTimeSelect = document.getElementById("typeTimeSelect");
-    typeTimeSelect.addEventListener("change", function() {
-        const selectedOption = this.value;
-
-        if (selectedOption === "option0") {
-            showMonthlyBonusTable(kpiData); // Funkcja dla miesięcznych danych
-        } else if (selectedOption === "option1") {
-            showQuarterlyBonusTable(kpiData); // Funkcja dla kwartalnych danych
         }
     });
 }
