@@ -25,3 +25,17 @@ Wrzesień,null,null,10%,null,null,40%,null,null,30%,null,null,20%,null,null,null
 Październik,null,null,10%,null,null,40%,null,null,30%,null,null,20%,null,null,null
 Listopad,null,null,10%,null,null,40%,null,null,30%,null,null,20%,null,null,null
 Grudzień,null,null,10%,null,null,40%,null,null,30%,null,null,20%,null,null,null
+
+Rok: 2023, Dane pracownika: ID: 5, Imię: MIREK, Nazwisko: DOBRY, Dane projektu: ID: 4, Nazwa projektu: PIOPIO
+Styczeń,160000,4000,25%,65,650.00,25%,89,890.00,50%,100,2000.00,3540.00
+Luty,null,null,25%,null,null,25%,null,null,50%,null,null,null
+Marzec,null,null,25%,null,null,25%,null,null,50%,null,null,null
+Kwiecień,null,null,25%,null,null,25%,null,null,50%,null,null,null
+Maj,null,null,25%,null,null,25%,null,null,50%,null,null,null
+Czerwiec,null,null,25%,null,null,25%,null,null,50%,null,null,null
+Lipiec,null,null,25%,null,null,25%,null,null,50%,null,null,null
+Sierpień,null,null,25%,null,null,25%,null,null,50%,null,null,null
+Wrzesień,null,null,25%,null,null,25%,null,null,50%,null,null,null
+Październik,null,null,25%,null,null,25%,null,null,50%,null,null,null
+Listopad,null,null,25%,null,null,25%,null,null,50%,null,null,null
+Grudzień,null,null,25%,null,null,25%,null,null,50%,null,null,null
