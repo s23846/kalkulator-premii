@@ -93,9 +93,8 @@ function parseAndFillBonusTable(csvData, selectedYear, employeeId, employeeName,
     const employeeData = rows.find(row => row.startsWith(`Rok: ${selectedYear}, Dane pracownika: ID: ${employeeId}`) && row.includes(`Dane projektu: ID: ${projectId}`));
 
     const tableBody = document.getElementById("premiaPodsumowanieCialo");
-    tableBody.innerHTML = '';
     let date = employeeData?.split('\n') || [];
-    console.log(csvData, projectId);
+    tableBody.innerHTML = '';
     if (date.length > 0) {
         const rows = csvData.split('\n\n');
         const employeeData = rows.find(row => row.startsWith(`Rok: ${selectedYear}, Dane pracownika: ID: ${employeeId}`) && row.includes(`Dane projektu: ID: ${projectId}`));
@@ -115,27 +114,11 @@ function parseAndFillBonusTable(csvData, selectedYear, employeeId, employeeName,
             tableBody.appendChild(tableRow);
         });
     } else {
-        const rows = csvData.split('\n\n');
-        const employeeData = rows.find(row => row.includes(`Dane projektu: ID: ${projectId}`));
-        let date = employeeData?.split('\n') || [];
-        const [header, ...dataRows] = date;
-        dataRows.forEach(row => {
-            const rowData = row.split(',');
-            const tableRow = document.createElement('tr');
-            rowData.forEach((cellData, index) => {
-                const cell = document.createElement('td');
-                if (index === 1 || (index >= 3 && (index - 3) % 3 === 1)) {
-                    cell.contentEditable = true;
-                } else {
-                    if (index === 0 || cellData.includes('%')) {
-                        cell.textContent = cellData !== 'null' ? cellData : '';
-                    }
-                }
-
-                tableRow.appendChild(cell);
+        fetch('frontend/listaKPIdlaProjektu.csv').then(response => {
+            response.text().then((res) => {
+                showMonthlyBonusTable(res);
             });
-            tableBody.appendChild(tableRow);
-        });
+        })
     }
 
     document.getElementById("premiaPodsumowanie").style.display = "table";
@@ -160,14 +143,6 @@ function attachInputEventListener(csvData, selectedYear, employeeId, employeeNam
                 fetch('frontend/listaRentownościProjektu.csv')
                     .then(response => response.text())
                     .then(csvData => {
-                        const rentownościRows = csvData.split('\n').map(row => row.split(','));
-                        const rentownościData = rentownościRows.map(row => ({
-                            projectId: row[0],
-                            lowerBound: parseFloat(row[2]),
-                            upperBound: parseFloat(row[3]),
-                            percent: parseFloat(row[4]),
-                            maxBonus: parseFloat(row[5])
-                        }));
                         const rentownosciRows = csvData.split('\n').map(row => row.split(','));
                         const rentownosciData = rentownosciRows.map(row => ({
                             projectId: row[0],
@@ -176,7 +151,9 @@ function attachInputEventListener(csvData, selectedYear, employeeId, employeeNam
                             percent: parseFloat(row[4]),
                             maxBonus: parseFloat(row[5])
                         }));
-                        const rentownosc = rentownosciData.find(r => r.projectId === projectId && projectValue >= r.lowerBound && projectValue <= r.upperBound);
+                        const rentownosc = rentownosciData.find(r => {
+                            return r.projectId == projectId && projectValue >= r.lowerBound && projectValue <= r.upperBound
+                        });
 
                         if (rentownosc) {
                             let maxBonus;
@@ -189,7 +166,6 @@ function attachInputEventListener(csvData, selectedYear, employeeId, employeeNam
                         } else {
                             maxBonusCell.innerText = '';
                         }
-                        console.log(kpiData);
                         const projectKPI = parseKPIForProject(kpiData, projectId, projectName) || [];
                         let kpis = [];
                         projectKPI.forEach((kpi, index) => {
@@ -406,7 +382,6 @@ function showMonthlyBonusTable(kpiData) {
         projectId,
         projectName
     } = projectInfo;
-    console.log(kpiData, projectId, projectName);
     const projectKPI = parseKPIForProject(kpiData, projectId, projectName);
     if (projectKPI.length === 0) {
         alert('Wybrany projekt nie posiada przypisanych KPI.');
