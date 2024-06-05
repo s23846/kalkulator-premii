@@ -21,7 +21,7 @@ function loadDataFromCSV() {
     fetch('/frontend/Listapracowników.csv') // Wczytaj dane z serwera
     .then(response => {
         if (!response.ok) {
-            throw new Error('Wystąpił problem podczas pobierania danych.');
+            throw new Error('Wystąpił problem podczas pobierania danych o pracownikach.');
         }
         return response.text();
     })
@@ -31,7 +31,7 @@ function loadDataFromCSV() {
     })
     .catch(error => {
         console.error('Błąd:', error);
-        alert('Wystąpił błąd podczas pobierania danych.');
+        alert('Wystąpił błąd podczas pobierania danych o pracownikach.');
     });
 }
 
@@ -39,7 +39,7 @@ function loadSavedData() {
     fetch('/get-saved-data') // Wczytaj zapisane dane z serwera
     .then(response => {
         if (!response.ok) {
-            throw new Error('Wystąpił problem podczas pobierania danych.');
+            throw new Error('Wystąpił problem podczas pobierania danych rozliczenia pracownika.');
         }
         return response.text();
     })
@@ -48,7 +48,7 @@ function loadSavedData() {
     })
     .catch(error => {
         console.error('Błąd:', error);
-        alert('Wystąpił błąd podczas pobierania zapisanych danych.');
+        alert('Wystąpił błąd podczas pobierania zapisanych danych rozliczenia pracownika.');
     });
 }
 
@@ -157,6 +157,7 @@ function handleEmployeeSelection() {
     if (selectedRow) {
         document.getElementById("filter-container").style.display = "none";
         document.getElementById("button7").style.display = "none";
+        document.getElementById("button9").style.display = "none";
         document.getElementById("tableBody").style.display = "none";
         document.querySelector('table thead').style.display = "none";
         document.querySelector('table').style.display = "none";
@@ -363,7 +364,7 @@ function saveTableToServer() {
     fetch('/get-saved-data')
     .then(response => {
         if (!response.ok) {
-            throw new Error('Wystąpił problem podczas pobierania danych.');
+            throw new Error('Wystąpił problem podczas pobierania danych o rozliczeniu pracownika.');
         }
         return response.text();
     })
@@ -414,18 +415,18 @@ function saveTableToServer() {
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Wystąpił problem podczas zapisywania danych.');
+                throw new Error('Wystąpił problem podczas zapisywania danych rozliczenia pracownika.');
             }
-            alert('Dane zostały zapisane pomyślnie.');
+            alert('Dane rozliczenia pracownika zostały zapisane pomyślnie.');
         })
         .catch(error => {
             console.error('Błąd:', error);
-            alert('Wystąpił błąd podczas zapisywania danych.');
+            alert('Wystąpił błąd podczas zapisywania danych rozliczenia pracownika.');
         });
     })
     .catch(error => {
         console.error('Błąd:', error);
-        alert('Wystąpił błąd podczas pobierania zapisanych danych.');
+        alert('Wystąpił błąd podczas pobierania zapisanych danych o rozliczeniu pracownika.');
     });
 }
 

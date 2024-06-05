@@ -26,7 +26,7 @@ SaveAfterEdition.style.display= "none";
 document.addEventListener('DOMContentLoaded', updateSum);
 
 document.getElementById("button10").addEventListener("click", function(event) {
-    event.preventDefault(); // Prevent the form from submitting
+    event.preventDefault();
     var input9Value = document.getElementById("input9").value;
     var input10Value = document.getElementById("input10").value;
 
@@ -58,7 +58,7 @@ document.getElementById("button10").addEventListener("click", function(event) {
 });
 
 document.getElementById("button11").addEventListener("click", function(event) {
-    event.preventDefault(); // Prevent the default form submission
+    event.preventDefault();
     
     // Pobierz wszystkie radio buttons
     var radioButtons = document.querySelectorAll('input[type="radio"][name="projekt"]');
@@ -96,7 +96,7 @@ document.getElementById("button11").addEventListener("click", function(event) {
 });
 
 document.getElementById("button12").addEventListener("click", function(event) {
-    event.preventDefault(); // Prevent the default form submission
+    event.preventDefault();
     
     // Pobierz wszystkie radio buttons
     var radioButtons = document.querySelectorAll('input[type="radio"][name="projekt"]');
@@ -163,7 +163,6 @@ function saveDataAboutProject() {
         const rowData = Array.from(row.children).map(td => td.textContent).join(",");
         csvContent += rowData.replace(/^,/,'') + "\n";
     });
-    console.log("Dane do wysłania:", csvContent);
     fetch('/save-data-project-to-repository', {
         method: 'POST',
         headers: {
@@ -172,11 +171,10 @@ function saveDataAboutProject() {
         body: csvContent
     })
     .then(response => {
-        console.log("Odpowiedź serwera:", response);
         if (!response.ok) {
-            throw new Error('Wystąpił problem podczas zapisywania danych.');
+            throw new Error('Wystąpił problem podczas zapisywania danych projektu.');
         }
-        alert('Dane zostały zapisane pomyślnie.');
+        alert('Dane o projekcie zostały zapisane pomyślnie.');
     })
     .catch(error => {
         console.error('Błąd:', error);
@@ -192,7 +190,7 @@ function loadDataProjectFromCSV() {
     fetch('/get-data-project-from-repository')
     .then(response => {
         if (!response.ok) {
-            throw new Error('Wystąpił problem podczas pobierania danych.');
+            throw new Error('Wystąpił problem podczas pobierania danych o projekcie.');
         }
         return response.text();
     })
@@ -201,7 +199,7 @@ function loadDataProjectFromCSV() {
     })
     .catch(error => {
         console.error('Błąd:', error);
-        alert('Wystąpił błąd podczas pobierania danych.');
+        alert('Wystąpił błąd podczas pobierania danych o projekcie.');
     });
 }
 
@@ -276,24 +274,22 @@ function loadDataRentabilityFromCSV() {
     fetch('/get-data-project-profitability-from-repository')
     .then(response => {
         if (!response.ok) {
-            throw new Error('Wystąpił problem podczas pobierania danych.');
+            throw new Error('Wystąpił problem podczas pobierania danych rentowności projektu.');
         }
         return response.text();
     })
     .then(csvData => {
-        console.log('Pobrane dane CSV:', csvData);
         fillTableWithDataRentability(csvData);
     })
     .catch(error => {
         console.error('Błąd:', error);
-        alert('Wystąpił błąd podczas pobierania danych.');
+        alert('Wystąpił błąd podczas pobierania danych rentowności projektu.');
     });
 }
 
 function getSelectedProjectId() {
     const selectedRadio = document.querySelector('input[name="projekt"]:checked');
     const selectedProjectId = selectedRadio ? selectedRadio.getAttribute('id') : null;
-    console.log('Wybrane ID projektu:', selectedProjectId);
     return selectedProjectId;
 }
 
@@ -308,7 +304,6 @@ function fillTableWithDataRentability(csvData) {
     }
 
     const rows = csvData.split('\n');
-    console.log('Wiersze CSV:', rows);
     
     rows.forEach((row, index) => {
         // Pomijaj puste wiersze
@@ -317,17 +312,14 @@ function fillTableWithDataRentability(csvData) {
         }
 
         const rowData = row.split(',');
-        console.log('Dane wiersza:', rowData);
 
         const projectId = rowData[0]; // Załóżmy, że ID projektu jest na indeksie 0
-        console.log('ID projektu w wierszu:', projectId);
 
         if (projectId !== selectedProjectId) {
             return;
         }
 
         const rentabilityData = rowData.slice(2, 6); // Wybierz odpowienie kolumny z pliku rentowności
-        console.log('Dane rentowności:', rentabilityData);
 
         const tableRow = document.createElement('tr');
 
@@ -348,7 +340,6 @@ function fillTableWithDataRentability(csvData) {
         });
 
         tableBody.appendChild(tableRow);
-        console.log('Dodano wiersz do tabeli:', tableRow);
     });
 }    
 
@@ -483,7 +474,7 @@ function fillTableWithDataRentability(csvData) {
     });
 
     document.getElementById("button18").addEventListener("click", function(event) {
-        event.preventDefault(); // Prevent the default form submission
+        event.preventDefault();
         
         // Pobierz wszystkie radio buttons
         var radioButtons = document.querySelectorAll('input[type="radio"][name="rentownosc"]');
@@ -597,17 +588,16 @@ function fillTableWithDataRentability(csvData) {
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Wystąpił problem podczas zapisywania danych.');
+                throw new Error('Wystąpił problem podczas zapisywania danych o rentowności projektu.');
             }
             return response.text();
         })
         .then(result => {
-            console.log(result);
-            alert('Dane zostały zaktualizowane pomyślnie.');
+            alert('Dane zostały rentowności projektu zostały zaktualizowane pomyślnie.');
         })
         .catch(error => {
             console.error('Błąd:', error);
-            alert('Wystąpił problem podczas zapisywania danych.');
+            alert('Wystąpił problem podczas zapisywania danych rentowności o projekcie.');
         });
     }
 
@@ -653,7 +643,7 @@ function fillTableWithDataRentability(csvData) {
         fetch(`/get-data-employee-from-repository-to-project?projectId=${projectId}&projectName=${projectName}`)
         .then(response => {
             if (!response.ok) {
-                throw new Error('Wystąpił problem podczas pobierania danych.');
+                throw new Error('Wystąpił problem podczas pobierania danych o pracownikach przypisanych do projektu.');
             }
             return response.text();
         })
@@ -662,7 +652,7 @@ function fillTableWithDataRentability(csvData) {
         })
         .catch(error => {
             console.error('Błąd:', error);
-            alert('Wystąpił błąd podczas pobierania danych.');
+            alert('Wystąpił błąd podczas pobierania danych o pracownikach przypisanych do projketu.');
         });
     }
     
@@ -755,17 +745,16 @@ function fillTableWithDataRentability(csvData) {
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Wystąpił problem podczas zapisywania danych.');
+                throw new Error('Wystąpił problem podczas zapisywania danych o pracownikach w projektach.');
             }
             return response.text();
         })
         .then(result => {
-            console.log(result);
-            alert('Przypisanie pracowników zaktualizowane pomyślnie.');
+            alert('Przypisanie pracowników do projektów zostało zaktualizowane pomyślnie.');
         })
         .catch(error => {
             console.error('Błąd:', error);
-            alert('Wystąpił problem podczas zapisywania danych.');
+            alert('Wystąpił problem podczas zapisywania danych o pracowniakch w projektach.');
         });
     }
 
@@ -844,7 +833,7 @@ function fillTableWithDataRentability(csvData) {
         fetch(`/get-data-KPI-for-project?projectId=${projectId}&projectName=${projectName}`)
         .then(response => {
             if (!response.ok) {
-                throw new Error('Wystąpił problem podczas pobierania danych.');
+                throw new Error('Wystąpił problem podczas pobierania danych o KPI dla wybranego projektu.');
             }
             return response.text();
         })
@@ -853,7 +842,7 @@ function fillTableWithDataRentability(csvData) {
         })
         .catch(error => {
             console.error('Błąd:', error);
-            alert('Wystąpił błąd podczas pobierania danych.');
+            alert('Wystąpił błąd podczas pobierania danych o KPI dla wybranego projektu.');
         });
         updateSum();
     }    
@@ -923,7 +912,7 @@ function fillTableWithDataRentability(csvData) {
     });
 
     document.getElementById("button22").addEventListener("click", function(event) {
-        event.preventDefault(); // Prevent the default form submission
+        event.preventDefault();
         
         // Pobierz wszystkie radio buttons
         var radioButtons = document.querySelectorAll('input[type="radio"][name="KPI"]');
@@ -1092,17 +1081,16 @@ function fillTableWithDataRentability(csvData) {
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Wystąpił problem podczas zapisywania danych.');
+                throw new Error('Wystąpił problem podczas zapisywania danych KPI dla projektu.');
             }
             return response.text();
         })
         .then(result => {
-            console.log(result);
             alert('Przypisanie KPI zaktualizowane pomyślnie.');
         })
         .catch(error => {
             console.error('Błąd:', error);
-            alert('Wystąpił problem podczas zapisywania danych.');
+            alert('Wystąpił problem podczas zapisywania danych KPI dla projektu.');
         });
     }
 

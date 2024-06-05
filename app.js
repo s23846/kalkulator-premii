@@ -66,9 +66,9 @@ app.post('/save-to-repository', (req, res) => {
     fs.writeFile('frontend/Listapracowników.csv', csvContent, 'utf8', (err) => {
         if (err) {
             console.error(err);
-            res.status(500).send('Wystąpił błąd podczas zapisywania danych.');
+            res.status(500).send('Wystąpił błąd podczas zapisywania danych pracowników.');
         } else {
-            res.send('Dane zostały zapisane pomyślnie.');
+            res.send('Dane pracowników zostały zapisane pomyślnie.');
         }
     });
 });
@@ -77,7 +77,7 @@ app.get('/get-csv-data', (req, res) => {
     fs.readFile('frontend/Listapracowników.csv', 'utf8', (err, data) => {
         if (err) {
             console.error(err);
-            res.status(500).send('Wystąpił błąd podczas odczytu danych.');
+            res.status(500).send('Wystąpił błąd podczas odczytu danych o pracownikach.');
             return;
         }
         res.send(data);
@@ -91,7 +91,7 @@ app.post('/save-employee-data', (req, res) => {
     fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {
             console.error(err);
-            res.status(500).send('Wystąpił błąd podczas odczytu danych.');
+            res.status(500).send('Wystąpił błąd podczas odczytu danych rozliczenia dla praoownika.');
             return;
         }
 
@@ -116,9 +116,9 @@ app.post('/save-employee-data', (req, res) => {
         fs.writeFile(filePath, updatedRecords, 'utf8', err => {
             if (err) {
                 console.error(err);
-                res.status(500).send('Wystąpił błąd podczas zapisywania danych.');
+                res.status(500).send('Wystąpił błąd podczas zapisywania danych rozliczenia pracownika.');
             } else {
-                res.send('Dane zostały zapisane pomyślnie.');
+                res.send('Dane rozliczenia pracownika zostały zapisane pomyślnie.');
             }
         });
     });
@@ -129,7 +129,7 @@ app.get('/get-saved-data', (req, res) => {
     fs.readFile('frontend/rozliczeniePracownika.csv', 'utf8', (err, data) => {
         if (err) {
             console.error(err);
-            res.status(500).send('Wystąpił błąd podczas odczytu danych.');
+            res.status(500).send('Wystąpił błąd podczas odczytu danych rozliczenia pracownika.');
             return;
         }
         res.send(data);
@@ -138,7 +138,6 @@ app.get('/get-saved-data', (req, res) => {
 
 app.post('/save-data-project-to-repository', (req, res) => {
     const csvContent = req.body;
-    console.log("Otrzymane dane CSV:", csvContent); // Loguj otrzymane dane
 
     // Dodaj sprawdzenie, czy dane są prawidłowe
     if (!csvContent || csvContent.trim() === "") {
@@ -149,9 +148,9 @@ app.post('/save-data-project-to-repository', (req, res) => {
     fs.writeFile('frontend/listaProjektów.csv', csvContent, 'utf8', (err) => {
         if (err) {
             console.error('Błąd podczas zapisywania pliku:', err);
-            res.status(500).send('Wystąpił błąd podczas zapisywania danych.');
+            res.status(500).send('Wystąpił błąd podczas zapisywania danych o projektach.');
         } else {
-            res.send('Dane zostały zapisane pomyślnie.');
+            res.send('Dane o projektach zostały zapisane pomyślnie.');
         }
     });
 });
@@ -161,7 +160,7 @@ app.get('/get-data-project-from-repository', (req, res) => {
     fs.readFile('frontend/listaProjektów.csv', 'utf8', (err, data) => {
         if (err) {
             console.error('Błąd podczas odczytu pliku:', err);
-            res.status(500).send('Wystąpił błąd podczas odczytu danych.');
+            res.status(500).send('Wystąpił błąd podczas odczytu danych o projektach.');
             return;
         }
         res.send(data);
@@ -169,7 +168,6 @@ app.get('/get-data-project-from-repository', (req, res) => {
 });
 
 app.post('/update-project-profitability', (req, res) => {
-    console.log(req.body);
     const {projectId, projectName, profitabilityData } = req.body;
 
     // Walidacja danych wejściowych
@@ -226,7 +224,7 @@ app.post('/update-project-profitability', (req, res) => {
                 return res.status(500).send('Błąd serwera.');
             }
 
-            res.send('Dane zostały zaktualizowane pomyślnie.');
+            res.send('Dane rentowności zostały zaktualizowane pomyślnie.');
         });
     });
 });
@@ -235,7 +233,7 @@ app.get('/get-data-project-profitability-from-repository', (req, res) => {
     fs.readFile('frontend/listaRentownościProjektu.csv', 'utf8', (err, data) => {
         if (err) {
             console.error('Błąd podczas odczytu pliku:', err);
-            res.status(500).send('Wystąpił błąd podczas odczytu danych.');
+            res.status(500).send('Wystąpił błąd podczas odczytu danych o rentowności.');
             return;
         }
         res.send(data);
@@ -293,7 +291,6 @@ app.get('/get-data-employee-from-repository-to-project', (req, res) => {
 
 
 app.post('/update-employee-assignments', (req, res) => {
-    console.log(req.body);
     const { projectId, projectName, employees } = req.body;
 
     // Walidacja danych wejściowych
@@ -362,7 +359,6 @@ app.post('/update-employee-assignments', (req, res) => {
         }
 
         const finalData = updatedData.join('\n');
-        console.log('updatedData:', finalData); // Dodano logowanie zaktualizowanych danych
 
         fs.writeFile(filePath, finalData, 'utf8', err => {
             if (err) {
@@ -370,7 +366,7 @@ app.post('/update-employee-assignments', (req, res) => {
                 return res.status(500).send('Błąd serwera.');
             }
 
-            res.send('Dane zostały zaktualizowane pomyślnie.');
+            res.send('Dane praconwików przypisanych do projektów zostały zaktualizowane pomyślnie.');
         });
     });
 });
@@ -411,7 +407,6 @@ app.get('/get-data-KPI-for-project', (req, res) => {
 });
 
 app.post('/update-kpi-assignments', (req, res) => {
-    console.log(req.body);
     const { projectId, projectName, KPIs } = req.body;
 
     // Walidacja danych wejściowych
@@ -480,7 +475,6 @@ app.post('/update-kpi-assignments', (req, res) => {
         }
 
         const finalData = updatedData.join('\n');
-        console.log('updatedData:', finalData); // Dodano logowanie zaktualizowanych danych
 
         fs.writeFile(filePath, finalData, 'utf8', err => {
             if (err) {
@@ -544,11 +538,11 @@ app.post('/save-premia-data', (req, res) => {
 
         fs.writeFile(csvFilePath, csvContent, 'utf8', (err) => {
             if (err) {
-                console.error('Error writing CSV file:', err);
+                console.error('Błąd odczytu danych z pliku CSV:', err);
                 return res.status(500).json({ message: 'Error writing CSV file' });
             }
 
-            res.json({ message: 'Data saved successfully' });
+            res.json({ message: 'Dane o premii dla pracownika zostały zapisane pomyślnie' });
         });
     });
 });

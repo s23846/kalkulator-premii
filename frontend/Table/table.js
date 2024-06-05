@@ -5,18 +5,8 @@ const button2 = document.getElementById('button2');
 const button3 = document.getElementById('button3');
 const row = document.getElementById('tableBody');
 
-button2.addEventListener('click', function() {
-    // Obsługa kliknięcia dla przycisku "Edytuj"
-    console.log('Kliknięto przycisk "Edytuj"');
-});
-
-button3.addEventListener('click', function() {
-    // Obsługa kliknięcia dla przycisku "Usuń"
-    console.log('Kliknięto przycisk "Usuń"');
-});
-
 document.getElementById("button1").addEventListener("click", function(event) {
-    event.preventDefault(); // Prevent the form from submitting
+    event.preventDefault();
     var input1Value = document.getElementById("input1").value;
     var input2Value = document.getElementById("input2").value;
     var input3Value = document.getElementById("input3").value;
@@ -65,7 +55,7 @@ document.getElementById("button1").addEventListener("click", function(event) {
 });
 
 document.getElementById("button2").addEventListener("click", function(event) {
-    event.preventDefault(); // Prevent the default form submission
+    event.preventDefault();
     
     // Pobierz wszystkie radio buttons
     var radioButtons = document.querySelectorAll('input[type="radio"][name="pracownik"]');
@@ -137,7 +127,7 @@ document.getElementById("button2").addEventListener("click", function(event) {
     });
 
     document.getElementById("button3").addEventListener("click", function(event) {
-        event.preventDefault(); // Prevent the default form submission
+        event.preventDefault();
         
         // Pobierz wszystkie radio buttons
         var radioButtons = document.querySelectorAll('input[type="radio"][name="pracownik"]');
@@ -198,8 +188,6 @@ document.getElementById("button2").addEventListener("click", function(event) {
             csvContent += rowData.replace(/^,/,'') + "\n";
         });
     
-        console.log("Dane do wysłania:", csvContent);
-    
         fetch('/save-to-repository', {
             method: 'POST',
             headers: {
@@ -208,15 +196,13 @@ document.getElementById("button2").addEventListener("click", function(event) {
             body: csvContent
         })
         .then(response => {
-            console.log("Odpowiedź serwera:", response);
             if (!response.ok) {
                 throw new Error('Wystąpił problem podczas zapisywania danych.');
             }
-            alert('Dane zostały zapisane pomyślnie.');
+            alert('Dane pracowników zostały zapisane pomyślnie.');
         })
         .catch(error => {
-            console.error('Błąd:', error);
-            alert('Wystąpił błąd podczas zapisywania danych.');
+            alert('Wystąpił błąd podczas zapisywania danych pracowników.');
         });
     }
 
@@ -228,7 +214,7 @@ document.getElementById("button2").addEventListener("click", function(event) {
         fetch('/get-csv-data')
         .then(response => {
             if (!response.ok) {
-                throw new Error('Wystąpił problem podczas pobierania danych.');
+                throw new Error('Wystąpił problem podczas pobierania danych o pracownikach.');
             }
             return response.text();
         })
@@ -237,7 +223,7 @@ document.getElementById("button2").addEventListener("click", function(event) {
         })
         .catch(error => {
             console.error('Błąd:', error);
-            alert('Wystąpił błąd podczas pobierania danych.');
+            alert('Wystąpił błąd podczas pobierania danych o pracownikach.');
         });
     }
     
